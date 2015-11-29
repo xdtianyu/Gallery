@@ -13,9 +13,6 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
-/**
- * Created by ty on 15-11-28.
- */
 public class Media {
 
     public static final int TYPE_IMAGE = 1;

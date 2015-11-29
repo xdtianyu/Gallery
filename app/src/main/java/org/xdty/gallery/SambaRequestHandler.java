@@ -8,9 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Created by ty on 15-11-28.
- */
 public class SambaRequestHandler extends RequestHandler {
 
     private static final String SAMBA_SCHEME = "smb";

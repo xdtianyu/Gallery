@@ -1,8 +1,5 @@
 package org.xdty.gallery.model;
 
-/**
- * Created by ty on 15-11-28.
- */
 public class Config {
 
     public final static String SAMBA_SERVER = "samba_server";

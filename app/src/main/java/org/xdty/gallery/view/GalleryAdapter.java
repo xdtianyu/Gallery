@@ -17,9 +17,6 @@ import org.xdty.gallery.model.Media;
 
 import java.util.List;
 
-/**
- * Created by ty on 15-11-28.
- */
 public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     public final static String TAG = GalleryAdapter.class.getSimpleName();

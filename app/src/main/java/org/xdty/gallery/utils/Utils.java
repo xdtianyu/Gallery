@@ -12,9 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-/**
- * Created by ty on 15-11-28.
- */
 public class Utils {
 
     public final static String TAG = "Utils";
