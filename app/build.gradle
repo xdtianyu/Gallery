@@ -45,4 +45,7 @@ dependencies {
     apt "org.androidannotations:androidannotations:$AAVersion"
     compile "org.androidannotations:androidannotations-api:$AAVersion"
 
+    compile "org.samba.jcifs:jcifs:1.3.17"
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
 }
