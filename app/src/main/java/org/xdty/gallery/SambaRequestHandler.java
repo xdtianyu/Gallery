@@ -1,14 +1,22 @@
 package org.xdty.gallery;
 
+import android.util.Log;
+
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Request;
 import com.squareup.picasso.RequestHandler;
+
+import org.xdty.gallery.model.Samba;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import jcifs.smb.SmbFile;
+
 public class SambaRequestHandler extends RequestHandler {
+
+    public final static String TAG = SambaRequestHandler.class.getSimpleName();
 
     private static final String SAMBA_SCHEME = "smb";
 
@@ -23,6 +31,13 @@ public class SambaRequestHandler extends RequestHandler {
     }
 
     InputStream getInputStream(Request request) throws FileNotFoundException {
+        Log.d(TAG, request.uri.toString());
+        try {
+            SmbFile smbFile = new SmbFile(request.uri.toString(), Samba.getAuth(request.uri.getHost()));
+            return smbFile.getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

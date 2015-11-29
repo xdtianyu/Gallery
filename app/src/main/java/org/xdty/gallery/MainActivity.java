@@ -18,6 +18,7 @@ import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.xdty.gallery.model.Media;
+import org.xdty.gallery.model.Samba;
 import org.xdty.gallery.view.GalleryAdapter;
 
 import java.io.File;
@@ -66,9 +67,9 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                 }
 
                 // can not scroll down and load more
-                if (!recyclerView.canScrollVertically(1)) {
-
-                }
+//                if (!recyclerView.canScrollVertically(1)) {
+//
+//                }
             }
         });
 
@@ -82,6 +83,10 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         if (root.isDirectory() || root.isFile()) {
             mMediaList.add(new Media(root));
         }
+
+        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
+        mMediaList.add(new Media(Samba.root("192.168.2.150")));
+
         notifyListChanged();
     }
 
@@ -92,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             mMediaList.clear();
 
             for (Media m : medias) {
-                if (m.isDirectory() || m.isImage() || m.isVideo()) {
+                if (m.isDirectory() || m.isImage()) {
                     mMediaList.add(m);
                 }
             }

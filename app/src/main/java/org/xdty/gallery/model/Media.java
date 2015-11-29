@@ -152,7 +152,7 @@ public class Media {
 
     public String getUri() {
         if (smbFile != null) {
-            return "smb://" + smbFile.getPath();
+            return smbFile.getPath();
         } else if (localFile != null) {
             return "file://" + localFile.getPath();
         } else {
