@@ -1,5 +1,6 @@
 package org.xdty.gallery;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -8,6 +9,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+
+import com.squareup.picasso.Picasso;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
@@ -32,22 +35,30 @@ import jcifs.smb.SmbException;
 @OptionsMenu(R.menu.menu_main)
 public class MainActivity extends AppCompatActivity implements GalleryAdapter.OnItemClickListener {
 
+    public final static String TAG = MainActivity.class.getSimpleName();
+
+    static Picasso.Builder mPicassoBuilder;
+
     @ViewById
     Toolbar toolbar;
-
     @ViewById
     SwipeRefreshLayout swipeRefreshLayout;
-
     @ViewById
     RecyclerView recyclerView;
-
     GalleryAdapter galleryAdapter;
-
+    boolean isRoot = false;
     private List<Media> mMediaList = new ArrayList<>();
+    private List<Media> mHistoryTree = new ArrayList<>();
 
     @AfterViews
     protected void initViews() {
         setSupportActionBar(toolbar);
+
+        if (mPicassoBuilder == null) {
+            mPicassoBuilder = new Picasso.Builder(this)
+                    .addRequestHandler(new SambaRequestHandler());
+            Picasso.setSingletonInstance(mPicassoBuilder.build());
+        }
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(gridLayoutManager);
@@ -55,6 +66,17 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         recyclerView.setAdapter(galleryAdapter);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    Picasso.with(recyclerView.getContext()).resumeTag(recyclerView.getContext());
+                } else {
+                    Picasso.with(recyclerView.getContext()).pauseTag(recyclerView.getContext());
+                }
+            }
+
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -73,21 +95,38 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             }
         });
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (isRoot) {
+                    loadRootDir();
+                } else {
+                    loadDir(mHistoryTree.get(mHistoryTree.size() - 1));
+                }
+            }
+        });
+
+        //Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
+
         loadRootDir();
     }
 
     @Background
     void loadRootDir() {
+
+        mMediaList.clear();
+
         String localRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
         File root = new File(localRoot);
         if (root.isDirectory() || root.isFile()) {
             mMediaList.add(new Media(root));
         }
 
-        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
         mMediaList.add(new Media(Samba.root("192.168.2.150")));
 
         notifyListChanged();
+
+        isRoot = true;
     }
 
     @Background
@@ -101,16 +140,25 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                     mMediaList.add(m);
                 }
             }
+
+            notifyListChanged();
+
+            if (!mHistoryTree.contains(media)) {
+                mHistoryTree.add(media);
+            }
+
+            isRoot = false;
         } catch (SmbException e) {
             e.printStackTrace();
+            Snackbar.make(toolbar, "Error", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
         }
-
-        notifyListChanged();
     }
 
     @UiThread
     void notifyListChanged() {
         galleryAdapter.notifyDataSetChanged();
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Click
@@ -129,6 +177,27 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     public void onItemClicked(int position, Media media) {
         if (media.isDirectory()) {
             loadDir(media);
+        } else {
+            Intent intent = new Intent(this, ViewerActivity_.class);
+            intent.putExtra("uri", media.getParent());
+            intent.putExtra("host", media.getHost());
+            intent.putExtra("position", position);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isRoot) {
+            super.onBackPressed();
+        } else {
+            mHistoryTree.remove(mHistoryTree.size() - 1);
+            if (mHistoryTree.size() == 0) {
+                loadRootDir();
+            } else {
+                Media media = mHistoryTree.get(mHistoryTree.size() - 1);
+                loadDir(media);
+            }
         }
     }
 }

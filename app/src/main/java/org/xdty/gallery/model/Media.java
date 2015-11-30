@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
@@ -25,13 +24,13 @@ public class Media {
     private int imageWidth;
 
     public Media(String path) throws MalformedURLException {
-        new Media(path, null);
+        this.localFile = new File(path);
     }
 
-    public Media(String path, NtlmPasswordAuthentication auth) throws MalformedURLException {
+    public Media(String path, String host) throws MalformedURLException {
 
-        if (path.startsWith(Config.SAMBA_PREFIX) && auth != null) {
-            this.smbFile = new SmbFile(path, auth);
+        if (path.startsWith(Config.SAMBA_PREFIX)) {
+            this.smbFile = new SmbFile(path, Samba.getAuth(host));
         } else {
             this.localFile = new File(path);
         }
@@ -96,6 +95,14 @@ public class Media {
         }
     }
 
+    public String getHost() {
+        if (smbFile != null) {
+            return smbFile.getServer();
+        } else {
+            return "";
+        }
+    }
+
     public boolean canRead() throws SmbException {
         if (smbFile != null) {
             return smbFile.canRead();
@@ -150,6 +157,17 @@ public class Media {
         }
     }
 
+    public String getParent() {
+        String parent;
+
+        if (smbFile!=null) {
+            parent = smbFile.getParent();
+        } else {
+            parent = "file://" + localFile.getParent();
+        }
+        return parent;
+    }
+
     public String getUri() {
         if (smbFile != null) {
             return smbFile.getPath();
@@ -195,7 +213,9 @@ public class Media {
         if (smbFile != null) {
             SmbFile[] files = smbFile.listFiles();
             for (SmbFile file : files) {
-                list.add(new Media(file));
+                if (!file.getName().contains(":")) {
+                    list.add(new Media(file));
+                }
             }
         } else if (localFile != null) {
             File[] files = localFile.listFiles();
@@ -276,5 +296,16 @@ public class Media {
         } else {
             return Utils.humanReadableDate(localFile.lastModified());
         }
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        boolean equal = false;
+
+        if (object != null && object instanceof Media) {
+            equal = this.getPath().equals(((Media) object).getPath());
+        }
+
+        return equal;
     }
 }

@@ -3,7 +3,6 @@ package org.xdty.gallery.view;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import org.xdty.gallery.R;
-import org.xdty.gallery.SambaRequestHandler;
 import org.xdty.gallery.model.Media;
 
 import java.util.List;
@@ -24,20 +22,18 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
     private static final int TYPE_MEDIA = 1000;
 
     private final LayoutInflater mLayoutInflater;
-    private Picasso mPicasso;
     private List<Media> mMedias;
+
+    private Context mContext;
 
     private OnItemClickListener mOnItemClickListener;
 
     public GalleryAdapter(Context context, List<Media> medias, OnItemClickListener listener) {
+        mContext = context;
         mMedias = medias;
         mOnItemClickListener = listener;
 
         mLayoutInflater = LayoutInflater.from(context);
-
-        mPicasso = new Picasso.Builder(context)
-                .addRequestHandler(new SambaRequestHandler())
-                .build();
     }
 
     @Override
@@ -58,6 +54,10 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public int getItemCount() {
         return mMedias.size();
+    }
+
+    public interface OnItemClickListener {
+        void onItemClicked(int position, Media media);
     }
 
     public class MediaViewHolder extends RecyclerView.ViewHolder implements IViewHolder {
@@ -85,25 +85,16 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
         public void bindViews(int position) {
             this.position = position;
             media = mMedias.get(position);
-            Log.d(TAG, "path: " + media.getPath());
+//            Log.d(TAG, "path: " + media.getPath());
 
             name.setText(media.getName());
 
             if (media.isDirectory()) {
-                mPicasso.load(R.drawable.folder)
-                        .fit()
-                        .centerCrop()
-                        .into(thumbnail);
+                Picasso.with(mContext).load(R.drawable.folder).fit().centerCrop().into(thumbnail);
             } else {
-                mPicasso.load(media.getUri())
-                        .fit()
-                        .centerCrop()
-                        .into(thumbnail);
+                Picasso.with(mContext).load(media.getUri()).tag(mContext).fit().centerCrop().into(
+                        thumbnail);
             }
         }
-    }
-
-    public interface OnItemClickListener {
-        void onItemClicked(int position, Media media);
     }
 }
