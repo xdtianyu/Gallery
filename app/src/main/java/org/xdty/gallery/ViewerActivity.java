@@ -40,14 +40,14 @@ public class ViewerActivity extends AppCompatActivity {
     private static String mUri = "";
     private static String mHost = "";
     private static int mPosition = 0;
-    final List<Media> mMedias = new ArrayList<>();
     @ViewById
     Toolbar toolbar;
     @ViewById
     FloatingActionButton fab;
     @ViewById(R.id.container)
     ViewPager viewPager;
-    SectionsPagerAdapter mSectionsPagerAdapter;
+    PagerAdapter mPagerAdapter;
+    private List<Media> mMedias = new ArrayList<>();
 
     @AfterViews
     protected void initViews() {
@@ -57,9 +57,9 @@ public class ViewerActivity extends AppCompatActivity {
         mHost = getIntent().getStringExtra("host");
 
         setSupportActionBar(toolbar);
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), mMedias);
 
-        viewPager.setAdapter(mSectionsPagerAdapter);
+        viewPager.setAdapter(mPagerAdapter);
 
         loadData();
     }
@@ -78,7 +78,7 @@ public class ViewerActivity extends AppCompatActivity {
 
     @UiThread
     void notifyDataSetChanged() {
-        mSectionsPagerAdapter.notifyDataSetChanged();
+        mPagerAdapter.notifyDataSetChanged();
     }
 
     @UiThread
@@ -98,17 +98,17 @@ public class ViewerActivity extends AppCompatActivity {
                 .setAction("Action", null).show();
     }
 
-    public class PlaceholderFragment extends Fragment {
-        private static final String POSITION = "position";
+    public static class ImageFragment extends Fragment {
+        private static final String URI = "uri";
 
-        public PlaceholderFragment() {
+        public ImageFragment() {
         }
 
-        public PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+        public static ImageFragment newInstance(String uri) {
+            ImageFragment fragment = new ImageFragment();
             Bundle args = new Bundle();
 
-            args.putInt(POSITION, sectionNumber);
+            args.putString(URI, uri);
             fragment.setArguments(args);
             return fragment;
         }
@@ -119,9 +119,8 @@ public class ViewerActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_viewer, container, false);
             PhotoView imageView = (PhotoView) rootView.findViewById(R.id.image);
 
-            int position = getArguments().getInt(POSITION);
-
-            Picasso.with(getContext()).load(mMedias.get(position).getUri())
+            String uri = getArguments().getString(URI);
+            Picasso.with(getContext()).load(uri)
                     .fit()
                     .centerInside()
                     .into(imageView);
@@ -132,18 +131,18 @@ public class ViewerActivity extends AppCompatActivity {
     }
 
 
-    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
+    private class PagerAdapter extends FragmentStatePagerAdapter {
 
-        PlaceholderFragment placeholderFragment;
+        List<Media> mediaList;
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public PagerAdapter(FragmentManager fm, List<Media> medias) {
             super(fm);
-            placeholderFragment = new PlaceholderFragment();
+            mediaList = medias;
         }
 
         @Override
         public Fragment getItem(int position) {
-            return placeholderFragment.newInstance(position);
+            return ImageFragment.newInstance(mediaList.get(position).getUri());
         }
 
         @Override
