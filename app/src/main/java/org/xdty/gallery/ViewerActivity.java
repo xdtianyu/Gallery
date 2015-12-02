@@ -3,8 +3,6 @@ package org.xdty.gallery;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -23,7 +21,6 @@ import com.squareup.picasso.Picasso;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
-import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.OptionsMenu;
@@ -50,12 +47,14 @@ public class ViewerActivity extends AppCompatActivity {
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final int UI_ANIMATION_DELAY = 300;
 
-    @ViewById
-    AppBarLayout appBar;
+//    @ViewById(R.id.main_content)
+//    CoordinatorLayout coordinatorLayout;
+//    @ViewById
+//    AppBarLayout appBar;
     @ViewById
     Toolbar toolbar;
-    @ViewById
-    FloatingActionButton fab;
+//    @ViewById
+//    FloatingActionButton fab;
     @ViewById(R.id.container)
     ViewPager viewPager;
 
@@ -78,7 +77,7 @@ public class ViewerActivity extends AppCompatActivity {
 
         loadData(uri, host, position);
 
-        hideSystemUIDelayed(3000);
+        hideSystemUIDelayed(0);
     }
 
     @Background
@@ -103,40 +102,16 @@ public class ViewerActivity extends AppCompatActivity {
         viewPager.setCurrentItem(position);
     }
 
-    @Click
-    void fab(View view) {
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
-    }
+//    @Click
+//    void fab(View view) {
+//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show();
+//    }
 
     @OptionsItem(R.id.action_settings)
     void settingSelected() {
         Snackbar.make(toolbar, "Settings", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
-    }
-
-    @UiThread
-    public void showSystemUI() {
-
-        cancelHideSystemUIDelayed();
-
-        appBar.setVisibility(View.VISIBLE);
-        toolbar.animate().translationY(0).setInterpolator(new DecelerateInterpolator()).start();
-
-        int flags = 0;
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            flags = View.SYSTEM_UI_FLAG_VISIBLE;
-
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        }
-        getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
     @UiThread
@@ -172,9 +147,43 @@ public class ViewerActivity extends AppCompatActivity {
         }
     }
 
-    private void hideSystemUI() {
+    @UiThread
+    public void showSystemUI(boolean autoHide) {
 
-        appBar.setVisibility(View.GONE);
+        cancelHideSystemUIDelayed();
+
+//        appBar.setVisibility(View.VISIBLE);
+
+        if (toolbar.getVisibility()==View.INVISIBLE) {
+            toolbar.setVisibility(View.VISIBLE);
+        }
+
+        toolbar.animate().translationY(0).setInterpolator(new DecelerateInterpolator()).start();
+
+        int flags = 0;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            flags = View.SYSTEM_UI_FLAG_VISIBLE;
+
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        }
+        getWindow().getDecorView().setSystemUiVisibility(flags);
+
+        if (autoHide) {
+            hideSystemUIDelayed(3000);
+        }
+    }
+
+    @UiThread
+    public void hideSystemUI() {
+
+//        appBar.setVisibility(View.GONE);
         toolbar.animate().translationY(-toolbar.getBottom()).setInterpolator(
                 new AccelerateInterpolator()).start();
 
@@ -228,8 +237,7 @@ public class ViewerActivity extends AppCompatActivity {
                 public void onPhotoTap(View view, float x, float y) {
                     ViewerActivity out = (ViewerActivity)getActivity();
                     if (!out.isSystemUIVisible()) {
-                        out.showSystemUI();
-                        out.hideSystemUIDelayed(3000);
+                        out.showSystemUI(true);
                     } else {
                         out.hideSystemUIDelayed(0);
                     }

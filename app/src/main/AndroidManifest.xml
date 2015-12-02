@@ -25,7 +25,7 @@
         <activity
             android:name=".ViewerActivity_"
             android:label="@string/title_activity_viewer"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/FullscreenTheme">
         </activity>
     </application>
 
