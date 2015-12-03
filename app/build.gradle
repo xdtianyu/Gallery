@@ -50,4 +50,11 @@ dependencies {
 
     compile 'com.commit451:PhotoView:1.2.4'
 
+    compile 'com.squareup.okhttp:okhttp:2.6.0'
+    compile ('org.simpleframework:simple-xml:2.7.1') {
+        exclude module: 'stax'
+        exclude module: 'stax-api'
+        exclude module: 'xpp3'
+    }
+
 }
