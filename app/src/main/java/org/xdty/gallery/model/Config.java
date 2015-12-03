@@ -19,6 +19,8 @@ public class Config {
 
     public final static String thumbnailDir = "thumbnails";
     public final static String SAMBA_PREFIX = "smb://";
+    public final static String DAV_PREFIX = "dav://";
+    public final static String DAVS_PREFIX = "davs://";
     public final static String ROOT_PATH = "root://";
 
     public final static String SERVERS = "servers";

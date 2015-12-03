@@ -17,8 +17,10 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +38,8 @@ public class WebDavFile {
     private long createTime;
     private long lastModified;
     private long size;
+    private boolean isDirectory = true;
+    private String parent = "";
 
     public WebDavFile(String url) throws MalformedURLException {
         this.url = new URL(null, url, Handler.DAV_HANDLER);
@@ -43,7 +47,8 @@ public class WebDavFile {
 
     public URL getUrl() {
         try {
-            return new URL(url.toString().replace("dav://", "http://").replace("davs://", "https://"));
+            return new URL(
+                    url.toString().replace("dav://", "http://").replace("davs://", "https://"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -81,12 +86,7 @@ public class WebDavFile {
         Request.Builder request = new Request.Builder()
                 .url(getUrl());
 
-        WebDavAuth.Auth auth = null;
-        try {
-            auth = WebDavAuth.getAuth(url.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        WebDavAuth.Auth auth = WebDavAuth.getAuth(url.toString());
 
         if (auth != null) {
             request.header("Authorization", Credentials.basic(auth.getUser(), auth.getPass()));
@@ -109,13 +109,20 @@ public class WebDavFile {
         try {
             MultiStatus multiStatus = serializer.read(MultiStatus.class, s);
             for (org.xdty.webdav.model.Response response : multiStatus.getResponse()) {
-                WebDavFile webDavFile = new WebDavFile(
-                        url.getProtocol() + "://" + url.getHost() + response.getHref());
+                String path = url.getProtocol() + "://" + url.getHost() + response.getHref();
+
+                if (path.equalsIgnoreCase(url.toString())) {
+                    continue;
+                }
+
+                WebDavFile webDavFile = new WebDavFile(path);
                 Prop prop = response.getPropstat().getProp();
                 webDavFile.setCanon(prop.getDisplayname());
                 webDavFile.setCreateTime(0);
                 webDavFile.setLastModified(0);
                 webDavFile.setSize(prop.getGetcontentlength());
+                webDavFile.setIsDirectory(prop.getResourcetype().getCollection() != null);
+                webDavFile.setParent(url.toString());
                 list.add(webDavFile);
             }
         } catch (Exception e) {
@@ -155,5 +162,51 @@ public class WebDavFile {
 
     public void setSize(long size) {
         this.size = size;
+    }
+
+    public boolean isDirectory() {
+        return isDirectory;
+    }
+
+    public String getName() {
+        try {
+            return URLDecoder.decode(getURLName(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return getURLName();
+    }
+
+    public String getURLName() {
+        return (parent.isEmpty() ? url.getFile() : url.toString().replace(parent, "")).
+                replace("/", "");
+    }
+
+    public String getHost() {
+        return url.getHost();
+    }
+
+    public boolean canRead() {
+        return true;
+    }
+
+    public boolean canWrite() {
+        return false;
+    }
+
+    public boolean exists() {
+        return true;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    private void setParent(String path) {
+        parent = path;
+    }
+
+    public void setIsDirectory(boolean isDirectory) {
+        this.isDirectory = isDirectory;
     }
 }

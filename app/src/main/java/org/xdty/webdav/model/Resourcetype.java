@@ -7,9 +7,13 @@ import org.simpleframework.xml.Root;
 public class Resourcetype {
 
     @Element(name = "collection", required = false)
-    protected String content;
+    protected Collection collection;
 
-    public String getContent() {
-        return this.content;
+    public Collection getCollection() {
+        return collection;
+    }
+
+    public void setCollection(Collection collection) {
+        this.collection = collection;
     }
 }

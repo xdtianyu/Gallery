@@ -29,15 +29,19 @@ public class WebDavAuth {
         }
     }
 
-    public static Auth getAuth(String url) throws MalformedURLException {
-        URL u = new URL(null, url, Handler.DAV_HANDLER);
-        String host = u.getHost();
-        int port = u.getPort();
+    public static Auth getAuth(String url) {
+        try {
+            URL u = new URL(null, url, Handler.DAV_HANDLER);
+            String host = u.getHost();
+            int port = u.getPort();
 
-        for (Auth auth : authList) {
-            if (auth.getHost().equals(host) && auth.getPort() == port) {
-                return auth;
+            for (Auth auth : authList) {
+                if (auth.getHost().equals(host) && auth.getPort() == port) {
+                    return auth;
+                }
             }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
         return null;
     }

@@ -25,6 +25,7 @@ import org.xdty.gallery.model.Samba;
 import org.xdty.gallery.view.GalleryAdapter;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +57,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
         if (mPicassoBuilder == null) {
             mPicassoBuilder = new Picasso.Builder(this)
-                    .addRequestHandler(new SambaRequestHandler());
+                    .addRequestHandler(new SambaRequestHandler())
+                    .addRequestHandler(new DavRequestHandler());
             Picasso.setSingletonInstance(mPicassoBuilder.build());
         }
 
@@ -106,7 +108,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             }
         });
 
-        //Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
+//        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
+//        WebDav.add("davs://www.example.com/usb/", "YOUR_USER", "YOUR_PASSWORD");
 
         loadRootDir();
     }
@@ -123,6 +126,11 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         }
 
         mMediaList.add(new Media(Samba.root("192.168.2.150")));
+        try {
+            mMediaList.add(new Media("davs://www.example.com/usb/"));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
         notifyListChanged();
 

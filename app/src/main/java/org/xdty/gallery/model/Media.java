@@ -1,6 +1,7 @@
 package org.xdty.gallery.model;
 
 import org.xdty.gallery.utils.Utils;
+import org.xdty.webdav.WebDavFile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,17 +21,24 @@ public class Media {
 
     private SmbFile smbFile;
     private File localFile;
+    private WebDavFile davFile;
     private int imageHeight;
     private int imageWidth;
 
     public Media(String path) throws MalformedURLException {
-        this.localFile = new File(path);
+        if (path.startsWith(Config.DAV_PREFIX) || path.startsWith(Config.DAVS_PREFIX)) {
+            davFile = new WebDavFile(path);
+        } else {
+            this.localFile = new File(path);
+        }
     }
 
     public Media(String path, String host) throws MalformedURLException {
 
         if (path.startsWith(Config.SAMBA_PREFIX)) {
             this.smbFile = new SmbFile(path, Samba.getAuth(host));
+        } else if (path.startsWith(Config.DAV_PREFIX) || path.startsWith(Config.DAVS_PREFIX)) {
+            this.davFile = new WebDavFile(path);
         } else {
             this.localFile = new File(path);
         }
@@ -38,6 +46,10 @@ public class Media {
 
     public Media(SmbFile smbFile) {
         this.smbFile = smbFile;
+    }
+
+    public Media(WebDavFile davFile) {
+        this.davFile = davFile;
     }
 
     public Media(File localFile) {
@@ -67,8 +79,9 @@ public class Media {
     public boolean isDirectory() {
         boolean result = false;
         try {
-            result =
-                    smbFile != null && smbFile.isDirectory() || localFile != null && localFile.isDirectory();
+            result = smbFile != null && smbFile.isDirectory() ||
+                    localFile != null && localFile.isDirectory() ||
+                    davFile != null && davFile.isDirectory();
         } catch (SmbException e) {
             e.printStackTrace();
         }
@@ -81,6 +94,8 @@ public class Media {
             result = smbFile.getName().toLowerCase().startsWith(".");
         } else if (localFile != null) {
             result = localFile.getName().toLowerCase().startsWith(".");
+        } else if (davFile != null) {
+            result = davFile.getName().toLowerCase().startsWith(".");
         }
         return result;
     }
@@ -90,6 +105,8 @@ public class Media {
             return smbFile.getName();
         } else if (localFile != null) {
             return localFile.getName();
+        } else if (davFile != null) {
+            return davFile.getName();
         } else {
             return null;
         }
@@ -98,6 +115,8 @@ public class Media {
     public String getHost() {
         if (smbFile != null) {
             return smbFile.getServer();
+        } else if (davFile != null) {
+            return davFile.getHost();
         } else {
             return "";
         }
@@ -106,6 +125,8 @@ public class Media {
     public boolean canRead() throws SmbException {
         if (smbFile != null) {
             return smbFile.canRead();
+        } else if (davFile != null) {
+            return davFile.canRead();
         } else {
             return localFile != null && localFile.canRead();
         }
@@ -114,6 +135,8 @@ public class Media {
     public boolean canWrite() throws SmbException {
         if (smbFile != null) {
             return smbFile.canWrite();
+        } else if (davFile != null) {
+            return davFile.canWrite();
         } else {
             return localFile != null && localFile.canWrite();
         }
@@ -122,6 +145,8 @@ public class Media {
     public boolean exists() throws SmbException {
         if (smbFile != null) {
             return smbFile.exists();
+        } else if (davFile != null) {
+            return davFile.exists();
         } else {
             return localFile != null && localFile.exists();
         }
@@ -152,6 +177,8 @@ public class Media {
             return smbFile.getPath();
         } else if (localFile != null) {
             return localFile.getPath();
+        } else if (davFile != null) {
+            return davFile.getPath();
         } else {
             return null;
         }
@@ -160,8 +187,10 @@ public class Media {
     public String getParent() {
         String parent;
 
-        if (smbFile!=null) {
+        if (smbFile != null) {
             parent = smbFile.getParent();
+        } else if (davFile != null) {
+            return davFile.getParent();
         } else {
             parent = "file://" + localFile.getParent();
         }
@@ -173,6 +202,8 @@ public class Media {
             return smbFile.getPath();
         } else if (localFile != null) {
             return "file://" + localFile.getPath();
+        } else if (davFile != null) {
+            return davFile.getPath();
         } else {
             return null;
         }
@@ -221,6 +252,15 @@ public class Media {
             File[] files = localFile.listFiles();
             for (File file : files) {
                 list.add(new Media(file));
+            }
+        } else if (davFile != null) {
+            try {
+                WebDavFile[] files = davFile.listFiles();
+                for (WebDavFile file : files) {
+                    list.add(new Media(file));
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
         }
         return list.toArray(new Media[list.size()]);
