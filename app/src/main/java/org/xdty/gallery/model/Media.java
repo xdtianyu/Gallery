@@ -1,5 +1,7 @@
 package org.xdty.gallery.model;
 
+import android.support.annotation.NonNull;
+
 import org.xdty.gallery.utils.Utils;
 import org.xdty.webdav.WebDavFile;
 
@@ -9,11 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
-public class Media {
+public class Media implements Comparable<Media> {
 
     public static final int TYPE_IMAGE = 1;
     public static final int TYPE_VIDEO = 2;
@@ -263,6 +266,7 @@ public class Media {
                 e.printStackTrace();
             }
         }
+        Collections.sort(list);
         return list.toArray(new Media[list.size()]);
     }
 
@@ -347,5 +351,10 @@ public class Media {
         }
 
         return equal;
+    }
+
+    @Override
+    public int compareTo(@NonNull Media another) {
+        return getName().compareTo(another.getName());
     }
 }

@@ -108,8 +108,9 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             }
         });
 
-        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
-        WebDav.add("davs://www.example.com/usb/", "YOUR_USER", "YOUR_PASSWORD");
+//        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
+//        Samba.add("192.168.2.110", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
+//        WebDav.add("davs://www.example.com/usb/", "YOUR_USER", "YOUR_PASSWORD");
 
         loadRootDir();
     }
@@ -121,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
         String localRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
         File root = new File(localRoot);
-
         mMediaList.add(new Media(root));
         mMediaList.add(new Media(Samba.root("192.168.2.150")));
         mMediaList.add(new Media(Samba.root("192.168.2.110")));

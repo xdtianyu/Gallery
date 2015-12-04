@@ -1,7 +1,5 @@
 package org.xdty.webdav;
 
-import android.util.Log;
-
 import com.squareup.okhttp.Credentials;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -73,7 +71,6 @@ public class WebDavFile {
         try {
             Response response = okHttpClient.newCall(request.build()).execute();
             String s = response.body().string();
-            Log.d(TAG, s);
             return parseDir(s);
         } catch (IOException | XmlPullParserException | IllegalArgumentException e) {
             e.printStackTrace();
