@@ -1,5 +1,9 @@
 package org.xdty.gallery;
 
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +21,7 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import org.androidannotations.annotations.AfterViews;
@@ -47,13 +52,13 @@ public class ViewerActivity extends AppCompatActivity {
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final int UI_ANIMATION_DELAY = 300;
 
-//    @ViewById(R.id.main_content)
+    //    @ViewById(R.id.main_content)
 //    CoordinatorLayout coordinatorLayout;
 //    @ViewById
 //    AppBarLayout appBar;
     @ViewById
     Toolbar toolbar;
-//    @ViewById
+    //    @ViewById
 //    FloatingActionButton fab;
     @ViewById(R.id.container)
     ViewPager viewPager;
@@ -99,7 +104,7 @@ public class ViewerActivity extends AppCompatActivity {
 
     @UiThread
     void setCurrentItem(int position) {
-        viewPager.setCurrentItem(position);
+        viewPager.setCurrentItem(position, false);
     }
 
 //    @Click
@@ -154,7 +159,7 @@ public class ViewerActivity extends AppCompatActivity {
 
 //        appBar.setVisibility(View.VISIBLE);
 
-        if (toolbar.getVisibility()==View.INVISIBLE) {
+        if (toolbar.getVisibility() == View.INVISIBLE) {
             toolbar.setVisibility(View.VISIBLE);
         }
 
@@ -209,8 +214,33 @@ public class ViewerActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Background
+    public void updateOrientation(int width, int height) {
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        int orientation = getRequestedOrientation();
+        if (width <= height && orientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else if (width > height && orientation != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+    }
+
     public static class ImageFragment extends Fragment {
         private static final String URI = "uri";
+
+        private boolean isOrientationUpdated = false;
+        private boolean isVisibleToUser = false;
 
         public ImageFragment() {
         }
@@ -224,18 +254,61 @@ public class ViewerActivity extends AppCompatActivity {
         }
 
         @Override
+        public void setUserVisibleHint(boolean isVisibleToUser) {
+            super.setUserVisibleHint(isVisibleToUser);
+
+            this.isVisibleToUser = isVisibleToUser;
+
+            if (isVisibleToUser && getView() != null) {
+                if (!isOrientationUpdated) {
+                    PhotoView image = (PhotoView) getView().findViewById(R.id.image);
+                    if (image != null && image.getDrawable() != null) {
+                        updateOrientation(image);
+                        isOrientationUpdated = true;
+                    }
+                }
+            } else {
+                isOrientationUpdated = false;
+            }
+        }
+
+        private void updateOrientation(PhotoView image) {
+            Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            bitmap = null;
+            if (getActivity() != null) {
+                ((ViewerActivity) getActivity()).updateOrientation(width, height);
+            }
+        }
+
+        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_viewer, container, false);
 
-            PhotoView image = (PhotoView) view.findViewById(R.id.image);
+            final PhotoView image = (PhotoView) view.findViewById(R.id.image);
             String uri = getArguments().getString(URI);
-            Picasso.with(getContext()).load(uri).fit().centerInside().into(image);
+            Picasso.with(getContext()).load(uri).fit().centerInside().into(image, new Callback() {
+                @Override
+                public void onSuccess() {
+                    if (isVisibleToUser && !isOrientationUpdated && getView() != null) {
+                        PhotoView image = (PhotoView) getView().findViewById(R.id.image);
+                        updateOrientation(image);
+                        isOrientationUpdated = true;
+                    }
+                }
+
+                @Override
+                public void onError() {
+
+                }
+            });
 
             image.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
                 @Override
                 public void onPhotoTap(View view, float x, float y) {
-                    ViewerActivity out = (ViewerActivity)getActivity();
+                    ViewerActivity out = (ViewerActivity) getActivity();
                     if (!out.isSystemUIVisible()) {
                         out.showSystemUI(true);
                     } else {

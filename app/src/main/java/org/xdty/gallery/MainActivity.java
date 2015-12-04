@@ -22,10 +22,10 @@ import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.xdty.gallery.model.Media;
 import org.xdty.gallery.model.Samba;
+import org.xdty.gallery.model.WebDav;
 import org.xdty.gallery.view.GalleryAdapter;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -108,8 +108,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             }
         });
 
-//        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
-//        WebDav.add("davs://www.example.com/usb/", "YOUR_USER", "YOUR_PASSWORD");
+        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
+        WebDav.add("davs://www.example.com/usb/", "YOUR_USER", "YOUR_PASSWORD");
 
         loadRootDir();
     }
@@ -121,16 +121,11 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
         String localRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
         File root = new File(localRoot);
-        if (root.isDirectory() || root.isFile()) {
-            mMediaList.add(new Media(root));
-        }
 
+        mMediaList.add(new Media(root));
         mMediaList.add(new Media(Samba.root("192.168.2.150")));
-        try {
-            mMediaList.add(new Media("davs://www.example.com/usb/"));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        mMediaList.add(new Media(Samba.root("192.168.2.110")));
+        mMediaList.add(new Media(WebDav.root("davs://www.example.com")));
 
         notifyListChanged();
 

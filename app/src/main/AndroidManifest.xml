@@ -25,7 +25,8 @@
         <activity
             android:name=".ViewerActivity_"
             android:label="@string/title_activity_viewer"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/FullscreenTheme"
+            android:configChanges="orientation|screenSize">
         </activity>
     </application>
 

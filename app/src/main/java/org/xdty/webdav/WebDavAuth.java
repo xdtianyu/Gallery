@@ -15,9 +15,7 @@ public class WebDavAuth {
     public static void addAuth(String url, String user, String password) {
 
         try {
-            URL u = new URL(null, url, Handler.DAV_HANDLER);
-
-            Auth auth = new Auth(u.getProtocol() + "://" + u.getHost(), user, password);
+            Auth auth = new Auth(url, user, password);
 
             if (authList.contains(auth)) {
                 throw new WebDavAuthException("Auth already exist.");
@@ -47,22 +45,25 @@ public class WebDavAuth {
     }
 
     public static class Auth {
-        private URL host;
+        private URL url;
         private String user;
         private String pass;
-
-        public Auth(String host, String user, String pass) throws MalformedURLException {
-            this.host = new URL(null, host, Handler.DAV_HANDLER);
+        public Auth(String url, String user, String pass) throws MalformedURLException {
+            this.url = new URL(null, url, Handler.DAV_HANDLER);
             this.user = user;
             this.pass = pass;
         }
 
+        public String getUrl() {
+            return url.toString();
+        }
+
         public String getHost() {
-            return host.getHost();
+            return url.getHost();
         }
 
         public int getPort() {
-            return host.getPort();
+            return url.getPort();
         }
 
         public String getUser() {
@@ -86,7 +87,7 @@ public class WebDavAuth {
             boolean isEqual = false;
 
             if (object != null && object instanceof Auth) {
-                isEqual = this.host.equals(((Auth) object).host) &&
+                isEqual = this.url.equals(((Auth) object).url) &&
                         this.user.equals(((Auth) object).user);
             }
 
