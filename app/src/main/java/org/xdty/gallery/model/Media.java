@@ -18,32 +18,51 @@ import jcifs.smb.SmbFile;
 
 public class Media implements Comparable<Media> {
 
+    public final static String TAG = Media.class.getSimpleName();
+
+    public final static String SCHEME_SAMBA = "smb";
+    public final static String SCHEME_DAV = "dav";
+    public final static String SCHEME_DAVS = "davs";
+    public final static String SCHEME_CACHE = "media-cache";
+
     public static final int TYPE_IMAGE = 1;
     public static final int TYPE_VIDEO = 2;
     public static final int TYPE_FOLDER = 3;
-
+    private static String cachePath;
     private SmbFile smbFile;
     private File localFile;
     private WebDavFile davFile;
+    private File cacheFile;
     private int imageHeight;
     private int imageWidth;
 
     public Media(String path) throws MalformedURLException {
-        if (path.startsWith(Config.DAV_PREFIX) || path.startsWith(Config.DAVS_PREFIX)) {
-            davFile = new WebDavFile(path);
-        } else {
-            this.localFile = new File(path);
-        }
+        this(path, getSmbHost(path));
     }
 
     public Media(String path, String host) throws MalformedURLException {
+        if (cachePath == null) {
+            throw new RuntimeException("Cache directory is not been set");
+        }
 
-        if (path.startsWith(Config.SAMBA_PREFIX)) {
+        boolean isCache = false;
+
+        if (path.startsWith(SCHEME_CACHE)) {
+            path = path.substring(path.indexOf('@') + 1, path.length());
+            host = getSmbHost(path);
+            isCache = true;
+        }
+
+        if (path.startsWith(SCHEME_SAMBA)) {
             this.smbFile = new SmbFile(path, Samba.getAuth(host));
-        } else if (path.startsWith(Config.DAV_PREFIX) || path.startsWith(Config.DAVS_PREFIX)) {
+        } else if (path.startsWith(SCHEME_DAV) || path.startsWith(SCHEME_DAVS)) {
             this.davFile = new WebDavFile(path);
         } else {
             this.localFile = new File(path);
+        }
+
+        if (isCache) {
+            this.cacheFile = new File(getCachePath());
         }
     }
 
@@ -57,6 +76,19 @@ public class Media implements Comparable<Media> {
 
     public Media(File localFile) {
         this.localFile = localFile;
+    }
+
+    public static void setCacheDir(String path) {
+        cachePath = path;
+    }
+
+    private static String getSmbHost(String path) {
+        if (path.startsWith("smb://")) {
+            path = path.replace("smb://", "");
+            return path.substring(0, path.indexOf("/"));
+        } else {
+            return null;
+        }
     }
 
     public int getImageHeight() {
@@ -160,6 +192,8 @@ public class Media implements Comparable<Media> {
             return smbFile.getLastModified();
         } else if (localFile != null) {
             return localFile.lastModified();
+        } else if (davFile != null) {
+            return davFile.getLastModified();
         } else {
             return -1;
         }
@@ -212,14 +246,39 @@ public class Media implements Comparable<Media> {
         }
     }
 
+    public String getCacheUri() {
+        return SCHEME_CACHE + "://" + getLastModified() + "@" + getUri();
+    }
+
     public InputStream getInputStream() throws IOException {
-        if (smbFile != null) {
+        if (isCache()) {
+            return new FileInputStream(cacheFile);
+        } else if (smbFile != null) {
             return smbFile.getInputStream();
         } else if (localFile != null) {
             return new FileInputStream(localFile);
+        } else if (davFile != null) {
+            return davFile.getInputStream();
         } else {
             return null;
         }
+    }
+
+    public String getCachePath() {
+        return cachePath + "/" + Utils.md5(getUri());
+    }
+
+    public String getCacheFileUri() {
+        return "file://" + cachePath + "/" + Utils.md5(getUri());
+    }
+
+    public boolean isCache() {
+        return cacheFile != null && cacheFile.exists();
+    }
+
+    public boolean hasCache() {
+        File f = new File(getCachePath());
+        return f.exists();
     }
 
     public boolean isGif() {

@@ -57,8 +57,9 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
         if (mPicassoBuilder == null) {
             mPicassoBuilder = new Picasso.Builder(this)
-                    .addRequestHandler(new SambaRequestHandler())
-                    .addRequestHandler(new DavRequestHandler());
+                    .indicatorsEnabled(true)
+                    .loggingEnabled(true)
+                    .addRequestHandler(new MediaRequestHandler());
             Picasso.setSingletonInstance(mPicassoBuilder.build());
         }
 
@@ -107,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                 }
             }
         });
+
+        Media.setCacheDir(getCacheDir().getAbsolutePath());
 
 //        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
 //        Samba.add("192.168.2.110", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
