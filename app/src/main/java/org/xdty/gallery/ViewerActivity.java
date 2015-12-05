@@ -1,9 +1,10 @@
 package org.xdty.gallery;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.BitmapFactory.Options;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +23,12 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.GenericRequestBuilder;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.model.StreamEncoder;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
@@ -31,8 +37,12 @@ import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.xdty.gallery.glide.BitmapSizeDecoder;
+import org.xdty.gallery.glide.MediaLoader;
+import org.xdty.gallery.glide.MediaRequestListener;
 import org.xdty.gallery.model.Media;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +61,7 @@ public class ViewerActivity extends AppCompatActivity {
     private static final boolean AUTO_HIDE = true;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final int UI_ANIMATION_DELAY = 300;
-
+    static GenericRequestBuilder<Uri, InputStream, Options, Options> glideSizeRequest;
     //    @ViewById(R.id.main_content)
 //    CoordinatorLayout coordinatorLayout;
 //    @ViewById
@@ -62,7 +72,6 @@ public class ViewerActivity extends AppCompatActivity {
 //    FloatingActionButton fab;
     @ViewById(R.id.container)
     ViewPager viewPager;
-
     PagerAdapter mPagerAdapter;
     private List<Media> mMedias = new ArrayList<>();
     private Handler mHandler = new Handler();
@@ -80,6 +89,15 @@ public class ViewerActivity extends AppCompatActivity {
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), mMedias);
         viewPager.setAdapter(mPagerAdapter);
 
+        glideSizeRequest = Glide.with(this)
+                .using(new MediaLoader(this), InputStream.class)
+                .from(Uri.class)
+                .as(Options.class)
+                .sourceEncoder(new StreamEncoder())
+                .cacheDecoder(new BitmapSizeDecoder())
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .listener(new MediaRequestListener());
+
         loadData(uri, host, position);
 
         hideSystemUIDelayed(0);
@@ -88,9 +106,7 @@ public class ViewerActivity extends AppCompatActivity {
     @Background
     void loadData(String uri, String host, int position) {
         try {
-            mMedias.clear();
-            mMedias.addAll(Arrays.asList(new Media(uri, host).listMedia()));
-            notifyDataSetChanged();
+            notifyDataSetChanged(Arrays.asList(new Media(uri, host).listMedia()));
         } catch (MalformedURLException | SmbException e) {
             e.printStackTrace();
         }
@@ -98,13 +114,10 @@ public class ViewerActivity extends AppCompatActivity {
     }
 
     @UiThread
-    void notifyDataSetChanged() {
+    void notifyDataSetChanged(List<Media> medias) {
+        mMedias.clear();
+        mMedias.addAll(medias);
         mPagerAdapter.notifyDataSetChanged();
-    }
-
-    @UiThread
-    void setCurrentItem(int position) {
-        viewPager.setCurrentItem(position, false);
     }
 
 //    @Click
@@ -112,6 +125,11 @@ public class ViewerActivity extends AppCompatActivity {
 //        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                .setAction("Action", null).show();
 //    }
+
+    @UiThread
+    void setCurrentItem(int position) {
+        viewPager.setCurrentItem(position, false);
+    }
 
     @OptionsItem(R.id.action_settings)
     void settingSelected() {
@@ -223,7 +241,7 @@ public class ViewerActivity extends AppCompatActivity {
     public void updateOrientation(int width, int height) {
 
         try {
-            Thread.sleep(500);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -241,6 +259,8 @@ public class ViewerActivity extends AppCompatActivity {
 
         private boolean isOrientationUpdated = false;
         private boolean isVisibleToUser = false;
+        private int width = -1;
+        private int height = -1;
 
         public ImageFragment() {
         }
@@ -259,24 +279,22 @@ public class ViewerActivity extends AppCompatActivity {
 
             this.isVisibleToUser = isVisibleToUser;
 
-            if (isVisibleToUser && getView() != null) {
+            if (isVisibleToUser) {
                 if (!isOrientationUpdated) {
-                    PhotoView image = (PhotoView) getView().findViewById(R.id.image);
-                    if (image != null && image.getDrawable() != null) {
-                        updateOrientation(image);
-                        isOrientationUpdated = true;
-                    }
+                    Log.d(TAG, "aaa: " + width + "x" + height);
+                    updateOrientation();
                 }
             } else {
                 isOrientationUpdated = false;
             }
         }
 
-        private void updateOrientation(PhotoView image) {
-            Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
-            int width = bitmap.getWidth();
-            int height = bitmap.getHeight();
-            bitmap = null;
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+        }
+
+        private void updateOrientation() {
             if (getActivity() != null) {
                 ((ViewerActivity) getActivity()).updateOrientation(width, height);
             }
@@ -287,23 +305,24 @@ public class ViewerActivity extends AppCompatActivity {
                 Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_viewer, container, false);
 
-            final PhotoView image = (PhotoView) view.findViewById(R.id.image);
+            PhotoView image = (PhotoView) view.findViewById(R.id.image);
             String uri = getArguments().getString(URI);
-            Picasso.with(getContext()).load(uri).fit().centerInside().into(image, new Callback() {
+
+            Glide.with(getContext()).load(Uri.parse(uri)).fitCenter().into(image);
+
+            glideSizeRequest.load(Uri.parse(uri)).into(new SimpleTarget<Options>() {
                 @Override
-                public void onSuccess() {
-                    if (isVisibleToUser && !isOrientationUpdated && getView() != null) {
-                        PhotoView image = (PhotoView) getView().findViewById(R.id.image);
-                        updateOrientation(image);
-                        isOrientationUpdated = true;
+                public void onResourceReady(Options resource,
+                        GlideAnimation glideAnimation) {
+                    width = resource.outWidth;
+                    height = resource.outHeight;
+
+                    if (isVisibleToUser && !isOrientationUpdated) {
+                        updateOrientation();
                     }
                 }
-
-                @Override
-                public void onError() {
-
-                }
-            });
+            })
+            ;
 
             image.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
                 @Override
@@ -332,7 +351,7 @@ public class ViewerActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return ImageFragment.newInstance(mediaList.get(position).getUri());
+            return ImageFragment.newInstance(mediaList.get(position).getUriString());
         }
 
         @Override

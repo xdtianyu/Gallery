@@ -12,6 +12,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="org.xdty.gallery.glide.GlideSetup"
+            android:value="GlideModule" />
         <activity
             android:name=".MainActivity_"
             android:label="@string/app_name"

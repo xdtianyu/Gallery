@@ -1,5 +1,6 @@
 package org.xdty.gallery.model;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import org.xdty.gallery.utils.Utils;
@@ -20,6 +21,7 @@ public class Media implements Comparable<Media> {
 
     public final static String TAG = Media.class.getSimpleName();
 
+    public final static String SCHEME_FILE = "file";
     public final static String SCHEME_SAMBA = "smb";
     public final static String SCHEME_DAV = "dav";
     public final static String SCHEME_DAVS = "davs";
@@ -51,6 +53,10 @@ public class Media implements Comparable<Media> {
             path = path.substring(path.indexOf('@') + 1, path.length());
             host = getSmbHost(path);
             isCache = true;
+        }
+
+        if (path.startsWith(SCHEME_FILE)) {
+            path = path.replace("file://", "");
         }
 
         if (path.startsWith(SCHEME_SAMBA)) {
@@ -234,7 +240,11 @@ public class Media implements Comparable<Media> {
         return parent;
     }
 
-    public String getUri() {
+    public Uri getUri() {
+        return Uri.parse(getUriString());
+    }
+
+    public String getUriString() {
         if (smbFile != null) {
             return smbFile.getPath();
         } else if (localFile != null) {
@@ -247,7 +257,7 @@ public class Media implements Comparable<Media> {
     }
 
     public String getCacheUri() {
-        return SCHEME_CACHE + "://" + getLastModified() + "@" + getUri();
+        return SCHEME_CACHE + "://" + getLastModified() + "@" + getUriString();
     }
 
     public InputStream getInputStream() throws IOException {
@@ -265,11 +275,11 @@ public class Media implements Comparable<Media> {
     }
 
     public String getCachePath() {
-        return cachePath + "/" + Utils.md5(getUri());
+        return cachePath + "/" + Utils.md5(getUriString());
     }
 
     public String getCacheFileUri() {
-        return "file://" + cachePath + "/" + Utils.md5(getUri());
+        return "file://" + cachePath + "/" + Utils.md5(getUriString());
     }
 
     public boolean isCache() {

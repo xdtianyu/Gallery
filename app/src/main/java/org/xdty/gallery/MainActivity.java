@@ -10,7 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
     public final static String TAG = MainActivity.class.getSimpleName();
 
-    static Picasso.Builder mPicassoBuilder;
-
     @ViewById
     Toolbar toolbar;
     @ViewById
@@ -55,14 +53,6 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     protected void initViews() {
         setSupportActionBar(toolbar);
 
-        if (mPicassoBuilder == null) {
-            mPicassoBuilder = new Picasso.Builder(this)
-                    .indicatorsEnabled(true)
-                    .loggingEnabled(true)
-                    .addRequestHandler(new MediaRequestHandler());
-            Picasso.setSingletonInstance(mPicassoBuilder.build());
-        }
-
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(gridLayoutManager);
         galleryAdapter = new GalleryAdapter(this, mMediaList, this);
@@ -74,9 +64,9 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                 super.onScrollStateChanged(recyclerView, newState);
 
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    Picasso.with(recyclerView.getContext()).resumeTag(recyclerView.getContext());
+                    Glide.with(recyclerView.getContext()).resumeRequests();
                 } else {
-                    Picasso.with(recyclerView.getContext()).pauseTag(recyclerView.getContext());
+                    Glide.with(recyclerView.getContext()).pauseRequests();
                 }
             }
 
