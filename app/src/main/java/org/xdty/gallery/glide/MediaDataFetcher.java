@@ -1,7 +1,6 @@
 package org.xdty.gallery.glide;
 
 import android.content.Context;
-import android.net.Uri;
 import android.util.Log;
 
 import com.bumptech.glide.Priority;
@@ -15,18 +14,18 @@ import java.io.InputStream;
 public class MediaDataFetcher implements DataFetcher<InputStream> {
 
     private static final String TAG = MediaDataFetcher.class.getSimpleName();
-    private final Uri uri;
+    private final Media media;
     private final Context context;
     private InputStream data;
 
-    public MediaDataFetcher(Context context, Uri uri) {
+    public MediaDataFetcher(Context context, Media media) {
         this.context = context;
-        this.uri = uri;
+        this.media = media;
     }
 
     @Override
     public InputStream loadData(Priority priority) throws Exception {
-        data = new Media(uri.toString()).getInputStream();
+        data = media.getInputStream();
         return data;
     }
 
@@ -45,7 +44,7 @@ public class MediaDataFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
-        return uri.toString();
+        return media.getUri();
     }
 
     @Override

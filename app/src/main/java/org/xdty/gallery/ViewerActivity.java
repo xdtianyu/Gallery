@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory.Options;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,7 +60,7 @@ public class ViewerActivity extends AppCompatActivity {
     private static final boolean AUTO_HIDE = true;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final int UI_ANIMATION_DELAY = 300;
-    static GenericRequestBuilder<Uri, InputStream, Options, Options> glideSizeRequest;
+    static GenericRequestBuilder<Media, InputStream, Options, Options> glideSizeRequest;
     //    @ViewById(R.id.main_content)
 //    CoordinatorLayout coordinatorLayout;
 //    @ViewById
@@ -91,7 +90,7 @@ public class ViewerActivity extends AppCompatActivity {
 
         glideSizeRequest = Glide.with(this)
                 .using(new MediaLoader(this), InputStream.class)
-                .from(Uri.class)
+                .from(Media.class)
                 .as(Options.class)
                 .sourceEncoder(new StreamEncoder())
                 .cacheDecoder(new BitmapSizeDecoder())
@@ -308,9 +307,9 @@ public class ViewerActivity extends AppCompatActivity {
             PhotoView image = (PhotoView) view.findViewById(R.id.image);
             String uri = getArguments().getString(URI);
 
-            Glide.with(getContext()).load(Uri.parse(uri)).fitCenter().into(image);
+            Glide.with(getContext()).load(Media.fromUri(uri)).fitCenter().into(image);
 
-            glideSizeRequest.load(Uri.parse(uri)).into(new SimpleTarget<Options>() {
+            glideSizeRequest.load(Media.fromUri(uri)).into(new SimpleTarget<Options>() {
                 @Override
                 public void onResourceReady(Options resource,
                         GlideAnimation glideAnimation) {
@@ -351,7 +350,7 @@ public class ViewerActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return ImageFragment.newInstance(mediaList.get(position).getUriString());
+            return ImageFragment.newInstance(mediaList.get(position).getUri());
         }
 
         @Override

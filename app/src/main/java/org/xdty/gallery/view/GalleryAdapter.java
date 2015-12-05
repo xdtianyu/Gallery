@@ -94,7 +94,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
                         thumbnail);
             } else {
                 Glide.with(mContext).load(
-                        media.getUri()).fitCenter().centerCrop().into(thumbnail);
+                        media).fitCenter().centerCrop().into(thumbnail);
 
             }
         }

@@ -1,6 +1,5 @@
 package org.xdty.gallery.model;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import org.xdty.gallery.utils.Utils;
@@ -40,6 +39,14 @@ public class Media implements Comparable<Media> {
 
     public Media(String path) throws MalformedURLException {
         this(path, getSmbHost(path));
+    }
+
+    public static Media fromUri(String uri) {
+        try {
+            return new Media(uri);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public Media(String path, String host) throws MalformedURLException {
@@ -240,11 +247,7 @@ public class Media implements Comparable<Media> {
         return parent;
     }
 
-    public Uri getUri() {
-        return Uri.parse(getUriString());
-    }
-
-    public String getUriString() {
+    public String getUri() {
         if (smbFile != null) {
             return smbFile.getPath();
         } else if (localFile != null) {
@@ -257,7 +260,7 @@ public class Media implements Comparable<Media> {
     }
 
     public String getCacheUri() {
-        return SCHEME_CACHE + "://" + getLastModified() + "@" + getUriString();
+        return SCHEME_CACHE + "://" + getLastModified() + "@" + getUri();
     }
 
     public InputStream getInputStream() throws IOException {
@@ -275,11 +278,11 @@ public class Media implements Comparable<Media> {
     }
 
     public String getCachePath() {
-        return cachePath + "/" + Utils.md5(getUriString());
+        return cachePath + "/" + Utils.md5(getUri());
     }
 
     public String getCacheFileUri() {
-        return "file://" + cachePath + "/" + Utils.md5(getUriString());
+        return "file://" + cachePath + "/" + Utils.md5(getUri());
     }
 
     public boolean isCache() {
