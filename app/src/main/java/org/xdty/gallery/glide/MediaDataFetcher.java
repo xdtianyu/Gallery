@@ -14,18 +14,18 @@ import java.io.InputStream;
 public class MediaDataFetcher implements DataFetcher<InputStream> {
 
     private static final String TAG = MediaDataFetcher.class.getSimpleName();
-    private final Media media;
+    private final Media mediaFile;
     private final Context context;
     private InputStream data;
 
-    public MediaDataFetcher(Context context, Media media) {
+    public MediaDataFetcher(Context context, Media mediaFile) {
         this.context = context;
-        this.media = media;
+        this.mediaFile = mediaFile;
     }
 
     @Override
     public InputStream loadData(Priority priority) throws Exception {
-        data = media.getInputStream();
+        data = mediaFile.getInputStream();
         return data;
     }
 
@@ -44,7 +44,7 @@ public class MediaDataFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
-        return media.getUri();
+        return mediaFile.getUri();
     }
 
     @Override

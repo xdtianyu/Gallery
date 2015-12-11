@@ -42,12 +42,10 @@ import org.xdty.gallery.glide.MediaRequestListener;
 import org.xdty.gallery.model.Media;
 
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import jcifs.smb.SmbException;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -72,7 +70,7 @@ public class ViewerActivity extends AppCompatActivity {
     @ViewById(R.id.container)
     ViewPager viewPager;
     PagerAdapter mPagerAdapter;
-    private List<Media> mMedias = new ArrayList<>();
+    private List<Media> mMediaFiles = new ArrayList<>();
     private Handler mHandler = new Handler();
     private Runnable hideSystemUIRunnable;
 
@@ -85,7 +83,7 @@ public class ViewerActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
 
-        mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), mMedias);
+        mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), mMediaFiles);
         viewPager.setAdapter(mPagerAdapter);
 
         glideSizeRequest = Glide.with(this)
@@ -104,18 +102,15 @@ public class ViewerActivity extends AppCompatActivity {
 
     @Background
     void loadData(String uri, String host, int position) {
-        try {
-            notifyDataSetChanged(Arrays.asList(new Media(uri, host).listMedia()));
-        } catch (MalformedURLException | SmbException e) {
-            e.printStackTrace();
-        }
+        notifyDataSetChanged(Arrays.asList(
+                (Media[]) Media.Builder.uri(uri).listMedia()));
         setCurrentItem(position);
     }
 
     @UiThread
-    void notifyDataSetChanged(List<Media> medias) {
-        mMedias.clear();
-        mMedias.addAll(medias);
+    void notifyDataSetChanged(List<Media> mediaFiles) {
+        mMediaFiles.clear();
+        mMediaFiles.addAll(mediaFiles);
         mPagerAdapter.notifyDataSetChanged();
     }
 
@@ -307,9 +302,10 @@ public class ViewerActivity extends AppCompatActivity {
             PhotoView image = (PhotoView) view.findViewById(R.id.image);
             String uri = getArguments().getString(URI);
 
-            Glide.with(getContext()).load(Media.fromUri(uri)).fitCenter().into(image);
+            Glide.with(getContext()).load(Media.Builder.uri(uri
+            )).fitCenter().into(image);
 
-            glideSizeRequest.load(Media.fromUri(uri)).into(new SimpleTarget<Options>() {
+            glideSizeRequest.load(Media.Builder.uri(uri)).into(new SimpleTarget<Options>() {
                 @Override
                 public void onResourceReady(Options resource,
                         GlideAnimation glideAnimation) {
@@ -341,26 +337,26 @@ public class ViewerActivity extends AppCompatActivity {
 
     private class PagerAdapter extends FragmentStatePagerAdapter {
 
-        List<Media> mediaList;
+        List<Media> mediaFileList;
 
-        public PagerAdapter(FragmentManager fm, List<Media> medias) {
+        public PagerAdapter(FragmentManager fm, List<Media> mediaFiles) {
             super(fm);
-            mediaList = medias;
+            mediaFileList = mediaFiles;
         }
 
         @Override
         public Fragment getItem(int position) {
-            return ImageFragment.newInstance(mediaList.get(position).getUri());
+            return ImageFragment.newInstance(mediaFileList.get(position).getUri());
         }
 
         @Override
         public int getCount() {
-            return mMedias.size();
+            return mMediaFiles.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return mMedias.get(position).getName();
+            return mMediaFiles.get(position).getName();
         }
     }
 

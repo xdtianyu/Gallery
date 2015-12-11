@@ -22,15 +22,15 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
     private static final int TYPE_MEDIA = 1000;
 
     private final LayoutInflater mLayoutInflater;
-    private List<Media> mMedias;
+    private List<Media> mMediaFiles;
 
     private Context mContext;
 
     private OnItemClickListener mOnItemClickListener;
 
-    public GalleryAdapter(Context context, List<Media> medias, OnItemClickListener listener) {
+    public GalleryAdapter(Context context, List<Media> mediaFiles, OnItemClickListener listener) {
         mContext = context;
-        mMedias = medias;
+        mMediaFiles = mediaFiles;
         mOnItemClickListener = listener;
 
         mLayoutInflater = LayoutInflater.from(context);
@@ -53,11 +53,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mMedias.size();
+        return mMediaFiles.size();
     }
 
     public interface OnItemClickListener {
-        void onItemClicked(int position, Media media);
+        void onItemClicked(int position, Media mediaFile);
     }
 
     public class MediaViewHolder extends RecyclerView.ViewHolder implements IViewHolder {
@@ -66,7 +66,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
         TextView name;
 
         int position;
-        Media media;
+        Media mediaFile;
 
         public MediaViewHolder(View view) {
             super(view);
@@ -74,7 +74,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
             thumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnItemClickListener.onItemClicked(position, media);
+                    mOnItemClickListener.onItemClicked(position, mediaFile);
                 }
             });
 
@@ -84,18 +84,17 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
         @Override
         public void bindViews(int position) {
             this.position = position;
-            media = mMedias.get(position);
-//            Log.d(TAG, "path: " + media.getPath());
+            mediaFile = mMediaFiles.get(position);
+//            Log.d(TAG, "path: " + mediaFile.getPath());
 
-            name.setText(media.getName());
+            name.setText(mediaFile.getName());
 
-            if (media.isDirectory()) {
+            if (mediaFile.isImage()) {
+                Glide.with(mContext).load(
+                        mediaFile).fitCenter().centerCrop().into(thumbnail);
+            } else {
                 Glide.with(mContext).load(R.drawable.folder).fitCenter().centerCrop().into(
                         thumbnail);
-            } else {
-                Glide.with(mContext).load(
-                        media).fitCenter().centerCrop().into(thumbnail);
-
             }
         }
     }

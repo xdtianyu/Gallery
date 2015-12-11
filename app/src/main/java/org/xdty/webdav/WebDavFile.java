@@ -199,7 +199,7 @@ public class WebDavFile {
         return parent;
     }
 
-    private void setParent(String path) {
+    public void setParent(String path) {
         parent = path;
     }
 
