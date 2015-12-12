@@ -25,6 +25,7 @@ public class MediaDataFetcher implements DataFetcher<InputStream> {
 
     @Override
     public InputStream loadData(Priority priority) throws Exception {
+        Log.e(TAG, "loading: " + mediaFile.getUri());
         data = mediaFile.getInputStream();
         return data;
     }

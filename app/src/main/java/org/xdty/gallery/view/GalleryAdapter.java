@@ -92,9 +92,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
             if (mediaFile.isImage()) {
                 Glide.with(mContext).load(
                         mediaFile).fitCenter().centerCrop().into(thumbnail);
+                name.setVisibility(View.GONE);
             } else {
                 Glide.with(mContext).load(R.drawable.folder).fitCenter().centerCrop().into(
                         thumbnail);
+                name.setVisibility(View.VISIBLE);
             }
         }
     }

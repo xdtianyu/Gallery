@@ -1,9 +1,7 @@
 package org.xdty.gallery;
 
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.BitmapFactory.Options;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,12 +20,10 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
-import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.model.StreamEncoder;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
@@ -36,12 +32,8 @@ import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
-import org.xdty.gallery.glide.BitmapSizeDecoder;
-import org.xdty.gallery.glide.MediaLoader;
-import org.xdty.gallery.glide.MediaRequestListener;
 import org.xdty.gallery.model.Media;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,21 +43,18 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 @EActivity(R.layout.activity_viewer)
 @OptionsMenu(R.menu.menu_viewer)
-public class ViewerActivity extends AppCompatActivity {
+public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
 
     public static final String TAG = ViewerActivity.class.getSimpleName();
 
-    private static final boolean AUTO_HIDE = true;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-    private static final int UI_ANIMATION_DELAY = 300;
-    static GenericRequestBuilder<Media, InputStream, Options, Options> glideSizeRequest;
-    //    @ViewById(R.id.main_content)
+//    @ViewById(R.id.main_content)
 //    CoordinatorLayout coordinatorLayout;
 //    @ViewById
 //    AppBarLayout appBar;
     @ViewById
     Toolbar toolbar;
-    //    @ViewById
+//    @ViewById
 //    FloatingActionButton fab;
     @ViewById(R.id.container)
     ViewPager viewPager;
@@ -86,14 +75,7 @@ public class ViewerActivity extends AppCompatActivity {
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), mMediaFiles);
         viewPager.setAdapter(mPagerAdapter);
 
-        glideSizeRequest = Glide.with(this)
-                .using(new MediaLoader(this), InputStream.class)
-                .from(Media.class)
-                .as(Options.class)
-                .sourceEncoder(new StreamEncoder())
-                .cacheDecoder(new BitmapSizeDecoder())
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .listener(new MediaRequestListener());
+        viewPager.addOnPageChangeListener(this);
 
         loadData(uri, host, position);
 
@@ -193,7 +175,7 @@ public class ViewerActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(flags);
 
         if (autoHide) {
-            hideSystemUIDelayed(3000);
+            hideSystemUIDelayed(AUTO_HIDE_DELAY_MILLIS);
         }
     }
 
@@ -234,10 +216,8 @@ public class ViewerActivity extends AppCompatActivity {
     @Background
     public void updateOrientation(int width, int height) {
 
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (width == height) {
+            return;
         }
 
         int orientation = getRequestedOrientation();
@@ -246,6 +226,21 @@ public class ViewerActivity extends AppCompatActivity {
         } else if (width > height && orientation != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        setTitle(mMediaFiles.get(position).getName());
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 
     public static class ImageFragment extends Fragment {
@@ -283,11 +278,6 @@ public class ViewerActivity extends AppCompatActivity {
             }
         }
 
-        @Override
-        public void onAttach(Context context) {
-            super.onAttach(context);
-        }
-
         private void updateOrientation() {
             if (getActivity() != null) {
                 ((ViewerActivity) getActivity()).updateOrientation(width, height);
@@ -302,22 +292,28 @@ public class ViewerActivity extends AppCompatActivity {
             PhotoView image = (PhotoView) view.findViewById(R.id.image);
             String uri = getArguments().getString(URI);
 
-            Glide.with(getContext()).load(Media.Builder.uri(uri
-            )).fitCenter().into(image);
+            Glide.with(getContext()).load(Media.Builder.uri(uri))
+                    .listener(new RequestListener<Media, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, Media model,
+                                Target<GlideDrawable> target,
+                                boolean isFirstResource) {
+                            return false;
+                        }
 
-            glideSizeRequest.load(Media.Builder.uri(uri)).into(new SimpleTarget<Options>() {
-                @Override
-                public void onResourceReady(Options resource,
-                        GlideAnimation glideAnimation) {
-                    width = resource.outWidth;
-                    height = resource.outHeight;
-
-                    if (isVisibleToUser && !isOrientationUpdated) {
-                        updateOrientation();
-                    }
-                }
-            })
-            ;
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource, Media model,
+                                Target<GlideDrawable> target, boolean isFromMemoryCache,
+                                boolean isFirstResource) {
+                            width = resource.getIntrinsicWidth();
+                            height = resource.getIntrinsicHeight();
+                            if (isVisibleToUser && !isOrientationUpdated) {
+                                updateOrientation();
+                            }
+                            return false;
+                        }
+                    })
+                    .fitCenter().into(image);
 
             image.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
                 @Override

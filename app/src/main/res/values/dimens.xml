@@ -5,4 +5,6 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="appbar_padding_top">0dp</dimen>
     <dimen name="toolbar_margin_top">0dp</dimen>
+    <dimen name="text_horizontal_padding">10dp</dimen>
+    <dimen name="image_item_padding">1dp</dimen>
 </resources>

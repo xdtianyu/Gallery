@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     @Override
     public void onItemClicked(int position, Media mediaFile) {
         if (mediaFile.isImage()) {
+            Glide.with(this).pauseRequests();
             Intent intent = new Intent(this, ViewerActivity_.class);
             intent.putExtra("uri", mediaFile.getParent());
             intent.putExtra("host", mediaFile.getHost());
