@@ -8,10 +8,14 @@ import org.xdty.webdav.WebDavFile;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Comparable<WebDavMedia> {
 
     private final static String[] SCHEME = new String[]{"dav", "davs"};
+
+    private WebDavMedia parent;
+    private List<WebDavMedia> children = new ArrayList<>();
 
     public WebDavMedia() throws MalformedURLException {
         super("dav://");
@@ -40,6 +44,34 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     @Override
     public long length() {
         return 0;
+    }
+
+    @Override
+    public WebDavMedia parent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(WebDavMedia parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public List<WebDavMedia> children() {
+
+        if (children.size() == 0) {
+            try {
+                WebDavFile[] files = super.listFiles();
+                for (WebDavFile file : files) {
+                    WebDavMedia media = new WebDavMedia(file);
+                    children.add(media);
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            Collections.sort(children);
+        }
+        return Collections.unmodifiableList(children);
     }
 
     @Override

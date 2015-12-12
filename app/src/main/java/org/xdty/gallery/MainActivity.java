@@ -17,6 +17,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.OnActivityResult;
 import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.UiThread;
@@ -28,7 +29,6 @@ import org.xdty.gallery.model.WebDavMedia;
 import org.xdty.gallery.view.GalleryAdapter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static android.os.Environment.getExternalStorageDirectory;
@@ -38,7 +38,7 @@ import static android.os.Environment.getExternalStorageDirectory;
 public class MainActivity extends AppCompatActivity implements GalleryAdapter.OnItemClickListener {
 
     public final static String TAG = MainActivity.class.getSimpleName();
-
+    public final static int REQUEST_POSITION = 1000;
     @ViewById
     Toolbar toolbar;
     @ViewById
@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     @ViewById
     RecyclerView recyclerView;
     GalleryAdapter galleryAdapter;
+    GridLayoutManager gridLayoutManager;
     boolean isRoot = false;
     private List<Media> mMediaFileList = new ArrayList<>();
     private List<Media> mHistoryTree = new ArrayList<>();
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
         setSupportActionBar(toolbar);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+        gridLayoutManager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(gridLayoutManager);
         galleryAdapter = new GalleryAdapter(this, mMediaFileList, this);
         recyclerView.setAdapter(galleryAdapter);
@@ -131,17 +132,20 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     void loadRootDir() {
 
         mMediaFileList.clear();
-        mMediaFileList.addAll(Arrays.asList(Media.Builder.roots()));
+        mMediaFileList.addAll(Media.Builder.roots());
+
+        Media.Builder.setCurrent(null);
 
         notifyListChanged();
 
         isRoot = true;
     }
 
+    @SuppressWarnings("unchecked")
     @Background
     void loadDir(Media media) {
         long start = System.currentTimeMillis();
-        List<Media> medias = Arrays.asList((Media[]) media.listMedia());
+        List<Media> medias = media.children();
         mMediaFileList.clear();
 
         for (Media m : medias) {
@@ -152,10 +156,6 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         Log.e("aaa", "" + (System.currentTimeMillis() - start));
 
         notifyListChanged();
-
-        if (!mHistoryTree.contains(media)) {
-            mHistoryTree.add(media);
-        }
 
         isRoot = false;
     }
@@ -179,16 +179,28 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     }
 
     @Override
-    public void onItemClicked(int position, Media mediaFile) {
-        if (mediaFile.isImage()) {
+    public void onItemClicked(int position, Media media) {
+        Media.Builder.setCurrent(media);
+        if (media.isImage()) {
             Glide.with(this).pauseRequests();
             Intent intent = new Intent(this, ViewerActivity_.class);
-            intent.putExtra("uri", mediaFile.getParent());
-            intent.putExtra("host", mediaFile.getHost());
+            intent.putExtra("uri", media.getParent());
+            intent.putExtra("host", media.getHost());
             intent.putExtra("position", position);
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_POSITION);
         } else {
-            loadDir(mediaFile);
+            loadDir(media);
+        }
+    }
+
+    @OnActivityResult(REQUEST_POSITION)
+    void onResult(@OnActivityResult.Extra int position) {
+        Log.d(TAG, "position: " + position);
+        int start = gridLayoutManager.findFirstCompletelyVisibleItemPosition();
+        int end = gridLayoutManager.findLastCompletelyVisibleItemPosition();
+
+        if (position < start || position > end) {
+            gridLayoutManager.scrollToPosition(position);
         }
     }
 
@@ -197,12 +209,11 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         if (isRoot) {
             super.onBackPressed();
         } else {
-            mHistoryTree.remove(mHistoryTree.size() - 1);
-            if (mHistoryTree.size() == 0) {
+            Media media = Media.Builder.getCurrent();
+            if (media == null || media.parent() == null) {
                 loadRootDir();
             } else {
-                Media mediaFile = mHistoryTree.get(mHistoryTree.size() - 1);
-                loadDir(mediaFile);
+                loadDir(media.parent());
             }
         }
     }

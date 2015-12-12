@@ -1,5 +1,6 @@
 package org.xdty.gallery;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -34,7 +35,6 @@ import org.androidannotations.annotations.ViewById;
 import org.xdty.gallery.model.Media;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import uk.co.senab.photoview.PhotoView;
@@ -47,6 +47,8 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     public static final String TAG = ViewerActivity.class.getSimpleName();
 
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private static final String POSITION = "position";
+    private static List<Media> mMediaFiles = new ArrayList<>();
     //    @ViewById(R.id.main_content)
 //    CoordinatorLayout coordinatorLayout;
 //    @ViewById
@@ -58,9 +60,9 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @ViewById(R.id.container)
     ViewPager viewPager;
     PagerAdapter mPagerAdapter;
-    private List<Media> mMediaFiles = new ArrayList<>();
     private Handler mHandler = new Handler();
     private Runnable hideSystemUIRunnable;
+    private int mSelectedPosition = -1;
 
     @AfterViews
     protected void initViews() {
@@ -71,7 +73,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
         setSupportActionBar(toolbar);
 
-        mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), mMediaFiles);
+        mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(mPagerAdapter);
 
         viewPager.addOnPageChangeListener(this);
@@ -81,10 +83,16 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         hideSystemUIDelayed(0);
     }
 
+//    @Click
+//    void fab(View view) {
+//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show();
+//    }
+
+    @SuppressWarnings("unchecked")
     @Background
     void loadData(String uri, String host, int position) {
-        notifyDataSetChanged(Arrays.asList(
-                (Media[]) Media.Builder.uri(uri).listMedia()));
+        notifyDataSetChanged(Media.Builder.getCurrent().parent().children());
         setCurrentItem(position);
     }
 
@@ -94,12 +102,6 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         mMediaFiles.addAll(mediaFiles);
         mPagerAdapter.notifyDataSetChanged();
     }
-
-//    @Click
-//    void fab(View view) {
-//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show();
-//    }
 
     @UiThread
     void setCurrentItem(int position) {
@@ -208,8 +210,25 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.putExtra(POSITION, mSelectedPosition);
+        setResult(RESULT_OK, intent);
+        super.onBackPressed();
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onDestroy() {
+        mMediaFiles.clear();
+        viewPager.clearOnPageChangeListeners();
+        viewPager.setAdapter(null);
+        mPagerAdapter = null;
+        super.onDestroy();
     }
 
     @Background
@@ -234,7 +253,9 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public void onPageSelected(int position) {
         Media media = mMediaFiles.get(position);
+        Media.Builder.setCurrent(media);
         setTitle(media.getName());
+        mSelectedPosition = position;
     }
 
     @Override
@@ -243,7 +264,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     public static class ImageFragment extends Fragment {
-        private static final String URI = "uri";
+
 
         private boolean isOrientationUpdated = false;
         private boolean isVisibleToUser = false;
@@ -253,10 +274,10 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         public ImageFragment() {
         }
 
-        public static ImageFragment newInstance(String uri) {
+        public static ImageFragment newInstance(int position) {
             ImageFragment fragment = new ImageFragment();
             Bundle args = new Bundle();
-            args.putString(URI, uri);
+            args.putInt(POSITION, position);
             fragment.setArguments(args);
             return fragment;
         }
@@ -288,9 +309,9 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
             View view = inflater.inflate(R.layout.fragment_viewer, container, false);
 
             PhotoView image = (PhotoView) view.findViewById(R.id.image);
-            String uri = getArguments().getString(URI);
+            int position = getArguments().getInt(POSITION);
 
-            Glide.with(getContext()).load(Media.Builder.uri(uri))
+            Glide.with(getContext()).load(mMediaFiles.get(position))
                     .listener(new RequestListener<Media, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, Media model,
@@ -331,16 +352,13 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     private class PagerAdapter extends FragmentStatePagerAdapter {
 
-        List<Media> mediaFileList;
-
-        public PagerAdapter(FragmentManager fm, List<Media> mediaFiles) {
+        public PagerAdapter(FragmentManager fm) {
             super(fm);
-            mediaFileList = mediaFiles;
         }
 
         @Override
         public Fragment getItem(int position) {
-            return ImageFragment.newInstance(mediaFileList.get(position).getUri());
+            return ImageFragment.newInstance(position);
         }
 
         @Override

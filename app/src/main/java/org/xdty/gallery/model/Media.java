@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public interface Media<T extends Media> {
 
@@ -20,6 +21,12 @@ public interface Media<T extends Media> {
     String getPath();
 
     String getParent();
+
+    T parent();
+
+    void setParent(T parent);
+
+    List<T> children();
 
     String getUri();
 
@@ -42,6 +49,8 @@ public interface Media<T extends Media> {
         private static ArrayList<Media> roots = new ArrayList<>();
         private static HashMap<String, Media> medias = new HashMap<>();
 
+        private static Media current;
+
         public static void register(Media media) {
             for (String scheme : media.scheme()) {
                 if (!medias.containsKey(scheme)) {
@@ -60,8 +69,16 @@ public interface Media<T extends Media> {
             throw new MediaException("Unknown scheme: " + uri);
         }
 
-        public static Media[] roots() {
-            return roots.toArray(new Media[roots.size()]);
+        public static List<Media> roots() {
+            return roots;
+        }
+
+        public static Media getCurrent() {
+            return current;
+        }
+
+        public static void setCurrent(Media current) {
+            Builder.current = current;
         }
 
         public static void addRoot(String uri, String username, String password) {

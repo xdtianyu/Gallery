@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import jcifs.smb.NtlmPasswordAuthentication;
@@ -17,6 +18,9 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
 
     private final static String[] SCHEME = new String[]{"smb"};
     private final static Map<String, NtlmPasswordAuthentication> smbAuthList = new HashMap<>();
+
+    private SambaMedia parent;
+    private List<SambaMedia> children = new ArrayList<>();
 
     public SambaMedia() throws MalformedURLException {
         this("smb://");
@@ -68,6 +72,37 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
 
     public long length() {
         return super.getContentLength();
+    }
+
+    @Override
+    public SambaMedia parent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(SambaMedia parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public List<SambaMedia> children() {
+
+        if (children.size() == 0) {
+            try {
+                SmbFile[] files = super.listFiles();
+                for (SmbFile file : files) {
+                    if (!file.getName().contains(":")) {
+                        SambaMedia media = new SambaMedia(file);
+                        media.setParent(this);
+                        children.add(media);
+                    }
+                }
+            } catch (SmbException | MalformedURLException | UnknownHostException e) {
+                e.printStackTrace();
+            }
+            Collections.sort(children);
+        }
+        return Collections.unmodifiableList(children);
     }
 
     @Override

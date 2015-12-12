@@ -6,10 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class LocalMedia extends File implements Media<LocalMedia>, Comparable<File> {
 
     private final static String[] SCHEME = new String[]{"file"};
+
+    private LocalMedia parent;
+    private List<LocalMedia> children = new ArrayList<>();
 
     public LocalMedia() {
         super("/");
@@ -26,6 +30,30 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
     @Override
     public String getParent() {
         return "file://" + super.getParent();
+    }
+
+    @Override
+    public void setParent(LocalMedia parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public LocalMedia parent() {
+        return parent;
+    }
+
+    @Override
+    public List<LocalMedia> children() {
+        if (children.size() == 0) {
+            File[] files = super.listFiles();
+            for (File file : files) {
+                LocalMedia media = new LocalMedia(file);
+                media.setParent(this);
+                children.add(media);
+            }
+            Collections.sort(children);
+        }
+        return Collections.unmodifiableList(children);
     }
 
     @Override
