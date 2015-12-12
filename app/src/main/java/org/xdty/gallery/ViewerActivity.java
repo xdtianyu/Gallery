@@ -12,7 +12,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,13 +47,13 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     public static final String TAG = ViewerActivity.class.getSimpleName();
 
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-//    @ViewById(R.id.main_content)
+    //    @ViewById(R.id.main_content)
 //    CoordinatorLayout coordinatorLayout;
 //    @ViewById
 //    AppBarLayout appBar;
     @ViewById
     Toolbar toolbar;
-//    @ViewById
+    //    @ViewById
 //    FloatingActionButton fab;
     @ViewById(R.id.container)
     ViewPager viewPager;
@@ -230,12 +229,12 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
     }
 
     @Override
     public void onPageSelected(int position) {
-        setTitle(mMediaFiles.get(position).getName());
+        Media media = mMediaFiles.get(position);
+        setTitle(media.getName());
     }
 
     @Override
@@ -270,7 +269,6 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
             if (isVisibleToUser) {
                 if (!isOrientationUpdated) {
-                    Log.d(TAG, "aaa: " + width + "x" + height);
                     updateOrientation();
                 }
             } else {
@@ -315,9 +313,9 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
                     })
                     .fitCenter().into(image);
 
-            image.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
+            image.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
                 @Override
-                public void onPhotoTap(View view, float x, float y) {
+                public void onViewTap(View view, float x, float y) {
                     ViewerActivity out = (ViewerActivity) getActivity();
                     if (!out.isSystemUIVisible()) {
                         out.showSystemUI(true);
