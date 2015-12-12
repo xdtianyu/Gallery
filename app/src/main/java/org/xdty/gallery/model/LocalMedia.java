@@ -80,6 +80,11 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
     }
 
     @Override
+    public LocalMedia auth(String domain, String directory, String username, String password) {
+        return this;
+    }
+
+    @Override
     public boolean equals(Object object) {
         boolean equal = false;
 

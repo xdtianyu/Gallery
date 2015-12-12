@@ -2,6 +2,7 @@ package org.xdty.gallery.model;
 
 import android.support.annotation.NonNull;
 
+import org.xdty.webdav.WebDavAuth;
 import org.xdty.webdav.WebDavFile;
 
 import java.net.MalformedURLException;
@@ -84,6 +85,17 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public WebDavMedia auth(String domain, String directory, String username, String password) {
+        for (String s : SCHEME) {
+            String url = s+"://"+domain+"/"+directory;
+            if (WebDavAuth.getAuth(url) == null) {
+                WebDavAuth.addAuth(url, username, password);
+            }
+        }
+        return this;
     }
 
     @Override

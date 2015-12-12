@@ -29,7 +29,6 @@ import org.xdty.gallery.model.WebDavMedia;
 import org.xdty.gallery.view.GalleryAdapter;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -113,15 +112,19 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             }
         });
 
-//        Samba.add("192.168.2.150", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
-//        Samba.add("192.168.2.110", "YOUR_SHARE_FOLDER", "YOUR_USER", "YOUR_PASSWORD");
-//        WebDav.add("davs://www.example.com/usb/", "YOUR_USER", "YOUR_PASSWORD");
-
         try {
             Media.Builder.register(new LocalMedia());
-            Media.Builder.register(new SambaMedia());
-            Media.Builder.register(new WebDavMedia());
-        } catch (MalformedURLException e) {
+
+            SambaMedia sambaMedia = new SambaMedia();
+
+            Media.Builder.register(sambaMedia);
+            WebDavMedia webDavMedia = new WebDavMedia();
+            Media.Builder.register(webDavMedia);
+
+//            sambaMedia.auth("192.168.2.150", "sdb1", "YOUR_USERNAME", "YOUR_PASSWORD");
+//            sambaMedia.auth("192.168.2.110", "mnt", "YOUR_USERNAME", "YOUR_PASSWORD");
+//            webDavMedia.auth("www.example.com", "usb", "YOUR_USERNAME", "YOUR_PASSWORD");
+        } catch (Exception e) {
             e.printStackTrace();
         }
         loadRootDir();
@@ -140,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 //        mMediaFileList.add(Media.Builder.uri("smb://192.168.2.110/mnt/"));
 //        mMediaFileList.add(Media.Builder.uri("smb://192.168.2.150/sdb1/"));
 //        mMediaFileList.add(Media.Builder.uri("davs://www.example.com/usb/"));
-
 
         notifyListChanged();
 

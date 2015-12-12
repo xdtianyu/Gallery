@@ -1,30 +1,33 @@
 package org.xdty.gallery.model;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
 public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable<SambaMedia> {
 
     private final static String[] SCHEME = new String[]{"smb"};
+    private final static Map<String, NtlmPasswordAuthentication> smbAuthList = new HashMap<>();
 
     public SambaMedia() throws MalformedURLException {
-        this("smb://", "");
+        this("smb://");
     }
 
-    public SambaMedia(String uri, String host) throws MalformedURLException {
-        super(uri, Samba.getAuth(host));
+    public SambaMedia(String uri) throws MalformedURLException {
+        super(uri, getAuth(uri));
     }
 
     public SambaMedia(SmbFile media) throws MalformedURLException, UnknownHostException {
-        super(media.getPath(), Samba.getAuth(media.getServer()));
+        super(media.getPath(), getAuth(media.getPath()));
     }
 
     @Override
@@ -86,9 +89,25 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
     @Override
     public SambaMedia fromUri(String uri) {
         try {
-            return new SambaMedia(uri, Uri.parse(uri).getHost());
+            return new SambaMedia(uri);
         } catch (MalformedURLException e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public SambaMedia auth(String domain, String directory, String username, String password) {
+        smbAuthList.put(domain + "/" + directory,
+                new NtlmPasswordAuthentication(domain, username, password));
+        return this;
+    }
+
+    private static NtlmPasswordAuthentication getAuth(String uri) {
+        for (String key : smbAuthList.keySet()) {
+            if (uri.contains(key)) {
+                return smbAuthList.get(key);
+            }
         }
         return null;
     }

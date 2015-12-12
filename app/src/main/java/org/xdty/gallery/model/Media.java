@@ -34,6 +34,8 @@ public interface Media<T extends Media> {
 
     T fromUri(String uri);
 
+    T auth(String domain, String directory, String username, String password);
+
     class Builder {
 
         private static HashMap<String, Media> medias = new HashMap<>();

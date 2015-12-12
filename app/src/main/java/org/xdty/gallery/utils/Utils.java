@@ -8,7 +8,6 @@ import android.util.TypedValue;
 import android.webkit.MimeTypeMap;
 
 import org.xdty.gallery.model.Config;
-import org.xdty.gallery.model.MediaFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,11 +59,6 @@ public class Utils {
             e.printStackTrace();
         }
         return "";
-    }
-
-    public static String md5(MediaFile mediaFile) {
-        return md5(
-                mediaFile.getPath() + mediaFile.getLastModified() + mediaFile.getContentLength());
     }
 
     public static String fillString(int count, char c) {
