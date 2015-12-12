@@ -67,13 +67,19 @@ public interface Media<T extends Media> {
         public static void addRoot(String uri, String username, String password) {
 
             if (uri.startsWith("/")) {
-                uri = "file://" + uri;
+                uri = "file:/" + uri;
             }
 
             if (uri.contains("://")) {
 
                 if (!uri.endsWith("/")) {
                     uri = uri + "/";
+                }
+
+                for (Media media : roots) {
+                    if (uri.equals(media.getUri()) || uri.equals(media.getUri() + "/")) {
+                        return;
+                    }
                 }
 
                 String[] parts = uri.split("://");
