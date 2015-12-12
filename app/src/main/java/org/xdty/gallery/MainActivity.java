@@ -1,7 +1,6 @@
 package org.xdty.gallery;
 
 import android.content.Intent;
-import android.os.Environment;
 import android.os.StrictMode;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -28,10 +27,11 @@ import org.xdty.gallery.model.SambaMedia;
 import org.xdty.gallery.model.WebDavMedia;
 import org.xdty.gallery.view.GalleryAdapter;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static android.os.Environment.getExternalStorageDirectory;
 
 @EActivity(R.layout.activity_main)
 @OptionsMenu(R.menu.menu_main)
@@ -114,16 +114,13 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
         try {
             Media.Builder.register(new LocalMedia());
+            Media.Builder.register(new SambaMedia());
+            Media.Builder.register(new WebDavMedia());
 
-            SambaMedia sambaMedia = new SambaMedia();
-
-            Media.Builder.register(sambaMedia);
-            WebDavMedia webDavMedia = new WebDavMedia();
-            Media.Builder.register(webDavMedia);
-
-//            sambaMedia.auth("192.168.2.150", "sdb1", "YOUR_USERNAME", "YOUR_PASSWORD");
-//            sambaMedia.auth("192.168.2.110", "mnt", "YOUR_USERNAME", "YOUR_PASSWORD");
-//            webDavMedia.auth("www.example.com", "usb", "YOUR_USERNAME", "YOUR_PASSWORD");
+            Media.Builder.addRoot(getExternalStorageDirectory().getAbsolutePath(), null, null);
+            Media.Builder.addRoot("smb://192.168.2.150/sdb1", "YOUR_USER", "YOUR_PASSWORD");
+            Media.Builder.addRoot("smb://192.168.2.110/mnt", "YOUR_USER", "YOUR_PASSWORD");
+            Media.Builder.addRoot("davs://www.example.com/usb", "YOUR_USER", "YOUR_PASSWORD");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -133,16 +130,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     @Background
     void loadRootDir() {
 
-//        MediaFile.setCacheDir(getCacheDir().getAbsolutePath());
-
         mMediaFileList.clear();
-
-        String localRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
-        File root = new File(localRoot);
-//        mMediaFileList.add(Media.Builder.uri("file://" + root.getPath()));
-//        mMediaFileList.add(Media.Builder.uri("smb://192.168.2.110/mnt/"));
-//        mMediaFileList.add(Media.Builder.uri("smb://192.168.2.150/sdb1/"));
-//        mMediaFileList.add(Media.Builder.uri("davs://www.example.com/usb/"));
+        mMediaFileList.addAll(Arrays.asList(Media.Builder.roots()));
 
         notifyListChanged();
 

@@ -30,6 +30,15 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
         super(media.getPath(), getAuth(media.getPath()));
     }
 
+    private static NtlmPasswordAuthentication getAuth(String uri) {
+        for (String key : smbAuthList.keySet()) {
+            if (uri.contains(key)) {
+                return smbAuthList.get(key);
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean isFile() {
         try {
@@ -97,19 +106,10 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
     }
 
     @Override
-    public SambaMedia auth(String domain, String directory, String username, String password) {
-        smbAuthList.put(domain + "/" + directory,
-                new NtlmPasswordAuthentication(domain, username, password));
+    public SambaMedia auth(String uri, String directory, String username, String password) {
+        smbAuthList.put(uri + "/" + directory,
+                new NtlmPasswordAuthentication(uri.replace("smb://", ""), username, password));
         return this;
-    }
-
-    private static NtlmPasswordAuthentication getAuth(String uri) {
-        for (String key : smbAuthList.keySet()) {
-            if (uri.contains(key)) {
-                return smbAuthList.get(key);
-            }
-        }
-        return null;
     }
 
     @Override

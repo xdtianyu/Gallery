@@ -88,12 +88,9 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
-    public WebDavMedia auth(String domain, String directory, String username, String password) {
-        for (String s : SCHEME) {
-            String url = s+"://"+domain+"/"+directory;
-            if (WebDavAuth.getAuth(url) == null) {
-                WebDavAuth.addAuth(url, username, password);
-            }
+    public WebDavMedia auth(String uri, String directory, String username, String password) {
+        if (WebDavAuth.getAuth(uri) == null) {
+            WebDavAuth.addAuth(uri, username, password);
         }
         return this;
     }
