@@ -92,7 +92,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @SuppressWarnings("unchecked")
     @Background
     void loadData(String uri, String host, int position) {
-        notifyDataSetChanged(Media.Builder.getCurrent().parent().children());
+        notifyDataSetChanged(Media.Builder.getCurrent().children());
         setCurrentItem(position);
     }
 
@@ -253,7 +253,6 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public void onPageSelected(int position) {
         Media media = mMediaFiles.get(position);
-        Media.Builder.setCurrent(media);
         setTitle(media.getName());
         mSelectedPosition = position;
     }

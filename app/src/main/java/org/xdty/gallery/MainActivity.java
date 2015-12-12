@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     GridLayoutManager gridLayoutManager;
     boolean isRoot = false;
     private List<Media> mMediaFileList = new ArrayList<>();
-    private List<Media> mHistoryTree = new ArrayList<>();
 
     @AfterViews
     protected void initViews() {
@@ -108,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                 if (isRoot) {
                     loadRootDir();
                 } else {
-                    loadDir(mHistoryTree.get(mHistoryTree.size() - 1));
+                    loadDir(Media.Builder.getCurrent());
                 }
             }
         });
@@ -158,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         notifyListChanged();
 
         isRoot = false;
+        Media.Builder.setCurrent(media);
     }
 
     @UiThread
@@ -180,7 +180,6 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
     @Override
     public void onItemClicked(int position, Media media) {
-        Media.Builder.setCurrent(media);
         if (media.isImage()) {
             Glide.with(this).pauseRequests();
             Intent intent = new Intent(this, ViewerActivity_.class);
