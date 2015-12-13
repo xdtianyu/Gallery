@@ -159,14 +159,12 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         isRoot = false;
         Media.Builder.setCurrent(media);
 
-        int position = media.getPosition();
-        if (position != 0) {
-            scrollToPosition(position);
-        }
+        scrollToPosition(media.getPosition());
     }
 
     @UiThread
     void scrollToPosition(int position) {
+        Log.d(TAG, "position: " +position);
         gridLayoutManager.scrollToPositionWithOffset(position, 0);
     }
 
@@ -198,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             intent.putExtra("position", position);
             startActivityForResult(intent, REQUEST_POSITION);
         } else {
-            Media current = Media.Builder.getCurrent();
+            Media current = media.parent();
             if (current != null) {
                 current.setPosition(gridLayoutManager.findFirstVisibleItemPosition());
             }
@@ -214,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         int end = gridLayoutManager.findLastCompletelyVisibleItemPosition();
 
         if (position < start || position > end) {
-            scrollToPosition(position);;
+            scrollToPosition(position);
         }
     }
 
