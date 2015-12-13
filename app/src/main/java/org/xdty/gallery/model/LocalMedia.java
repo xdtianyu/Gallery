@@ -44,7 +44,7 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
     }
 
     @Override
-    public List<LocalMedia> children() {
+    public synchronized List<LocalMedia> children() {
         if (children.size() == 0) {
             File[] files = super.listFiles();
             for (File file : files) {

@@ -86,7 +86,7 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
     }
 
     @Override
-    public List<SambaMedia> children() {
+    public synchronized List<SambaMedia> children() {
 
         if (children.size() == 0) {
             try {

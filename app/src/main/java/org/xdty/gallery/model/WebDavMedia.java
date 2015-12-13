@@ -58,13 +58,14 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
-    public List<WebDavMedia> children() {
+    public synchronized List<WebDavMedia> children() {
 
         if (children.size() == 0) {
             try {
                 WebDavFile[] files = super.listFiles();
                 for (WebDavFile file : files) {
                     WebDavMedia media = new WebDavMedia(file);
+                    media.setParent(this);
                     children.add(media);
                 }
             } catch (MalformedURLException e) {
