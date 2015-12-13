@@ -22,6 +22,7 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
     private SambaMedia parent;
     private List<SambaMedia> children = new ArrayList<>();
     private int position;
+    private boolean hasImage = false;
 
     public SambaMedia() throws MalformedURLException {
         this("smb://");
@@ -86,6 +87,18 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
     }
 
     @Override
+    public void clear() {
+        children.clear();
+        hasImage = false;
+        position = 0;
+    }
+
+    @Override
+    public boolean hasImage() {
+        return hasImage;
+    }
+
+    @Override
     public synchronized List<SambaMedia> children() {
 
         if (children.size() == 0) {
@@ -96,6 +109,12 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
                         SambaMedia media = new SambaMedia(file);
                         media.setParent(this);
                         children.add(media);
+
+                        if (!hasImage) {
+                            if (media.isImage()) {
+                                hasImage = true;
+                            }
+                        }
                     }
                 }
             } catch (SmbException | MalformedURLException | UnknownHostException e) {

@@ -26,6 +26,10 @@ public interface Media<T extends Media> {
 
     void setParent(T parent);
 
+    void clear();
+
+    boolean hasImage();
+
     List<T> children();
 
     String getUri();

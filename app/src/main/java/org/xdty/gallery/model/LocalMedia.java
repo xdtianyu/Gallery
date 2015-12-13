@@ -15,6 +15,7 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
     private LocalMedia parent;
     private List<LocalMedia> children = new ArrayList<>();
     private int position = 0;
+    private boolean hasImage = false;
 
     public LocalMedia() {
         super("/");
@@ -39,6 +40,18 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
     }
 
     @Override
+    public void clear() {
+        children.clear();
+        hasImage = false;
+        position = 0;
+    }
+
+    @Override
+    public boolean hasImage() {
+        return hasImage;
+    }
+
+    @Override
     public LocalMedia parent() {
         return parent;
     }
@@ -51,6 +64,12 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
                 LocalMedia media = new LocalMedia(file);
                 media.setParent(this);
                 children.add(media);
+
+                if (!hasImage) {
+                    if (media.isImage()) {
+                        hasImage = true;
+                    }
+                }
             }
             Collections.sort(children);
         }

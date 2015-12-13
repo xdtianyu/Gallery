@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                 if (isRoot) {
                     loadRootDir();
                 } else {
-                    loadDir(Media.Builder.getCurrent());
+                    loadDir(Media.Builder.getCurrent(), true);
                 }
             }
         });
@@ -141,10 +141,19 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         isRoot = true;
     }
 
+    void loadDir(Media media) {
+        loadDir(media, false);
+    }
+
     @SuppressWarnings("unchecked")
     @Background
-    void loadDir(Media media) {
+    void loadDir(Media media, boolean isRefresh) {
         long start = System.currentTimeMillis();
+
+        if (isRefresh) {
+            media.clear();
+        }
+
         List<Media> medias = media.children();
         mMediaFileList.clear();
 
@@ -166,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
     @UiThread
     void scrollToPosition(int position) {
-        Log.d(TAG, "position: " +position);
+        Log.d(TAG, "position: " + position);
         gridLayoutManager.scrollToPositionWithOffset(position, 0);
     }
 

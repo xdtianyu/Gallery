@@ -17,6 +17,7 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     private WebDavMedia parent;
     private List<WebDavMedia> children = new ArrayList<>();
     private int position;
+    private boolean hasImage = false;
 
     public WebDavMedia() throws MalformedURLException {
         super("dav://");
@@ -58,6 +59,18 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
+    public void clear() {
+        children.clear();
+        hasImage = false;
+        position = 0;
+    }
+
+    @Override
+    public boolean hasImage() {
+        return hasImage;
+    }
+
+    @Override
     public synchronized List<WebDavMedia> children() {
 
         if (children.size() == 0) {
@@ -67,6 +80,12 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
                     WebDavMedia media = new WebDavMedia(file);
                     media.setParent(this);
                     children.add(media);
+
+                    if (!hasImage) {
+                        if (media.isImage()) {
+                            hasImage = true;
+                        }
+                    }
                 }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
