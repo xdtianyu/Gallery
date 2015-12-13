@@ -21,6 +21,7 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
 
     private SambaMedia parent;
     private List<SambaMedia> children = new ArrayList<>();
+    private int position;
 
     public SambaMedia() throws MalformedURLException {
         this("smb://");
@@ -145,6 +146,16 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
         smbAuthList.put(uri + "/" + directory,
                 new NtlmPasswordAuthentication(uri.replace("smb://", ""), username, password));
         return this;
+    }
+
+    @Override
+    public int getPosition() {
+        return position;
+    }
+
+    @Override
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     @Override

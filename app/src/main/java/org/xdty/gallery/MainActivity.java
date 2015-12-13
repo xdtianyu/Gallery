@@ -158,6 +158,16 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
         isRoot = false;
         Media.Builder.setCurrent(media);
+
+        int position = media.getPosition();
+        if (position != 0) {
+            scrollToPosition(position);
+        }
+    }
+
+    @UiThread
+    void scrollToPosition(int position) {
+        gridLayoutManager.scrollToPositionWithOffset(position, 0);
     }
 
     @UiThread
@@ -188,6 +198,11 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             intent.putExtra("position", position);
             startActivityForResult(intent, REQUEST_POSITION);
         } else {
+            Media current = Media.Builder.getCurrent();
+            if (current != null) {
+                current.setPosition(gridLayoutManager.findFirstVisibleItemPosition());
+            }
+
             loadDir(media);
         }
     }
@@ -199,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         int end = gridLayoutManager.findLastCompletelyVisibleItemPosition();
 
         if (position < start || position > end) {
-            gridLayoutManager.scrollToPosition(position);
+            scrollToPosition(position);;
         }
     }
 
@@ -212,6 +227,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             if (media == null || media.parent() == null) {
                 loadRootDir();
             } else {
+                recyclerView.computeVerticalScrollOffset();
+                media.setPosition(gridLayoutManager.findFirstVisibleItemPosition());
                 loadDir(media.parent());
             }
         }

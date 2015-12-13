@@ -14,6 +14,7 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
 
     private LocalMedia parent;
     private List<LocalMedia> children = new ArrayList<>();
+    private int position = 0;
 
     public LocalMedia() {
         super("/");
@@ -110,6 +111,16 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
     @Override
     public LocalMedia auth(String domain, String directory, String username, String password) {
         return this;
+    }
+
+    @Override
+    public int getPosition() {
+        return position;
+    }
+
+    @Override
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     @Override

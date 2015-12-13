@@ -44,6 +44,10 @@ public interface Media<T extends Media> {
 
     T auth(String domain, String directory, String username, String password);
 
+    int getPosition();
+
+    void setPosition(int position);
+
     class Builder {
 
         private static ArrayList<Media> roots = new ArrayList<>();

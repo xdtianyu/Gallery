@@ -16,6 +16,7 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
 
     private WebDavMedia parent;
     private List<WebDavMedia> children = new ArrayList<>();
+    private int position;
 
     public WebDavMedia() throws MalformedURLException {
         super("dav://");
@@ -125,6 +126,16 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
             WebDavAuth.addAuth(uri, username, password);
         }
         return this;
+    }
+
+    @Override
+    public int getPosition() {
+        return position;
+    }
+
+    @Override
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     @Override
