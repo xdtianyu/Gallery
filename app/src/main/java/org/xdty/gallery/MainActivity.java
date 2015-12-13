@@ -76,10 +76,10 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
 
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    Glide.with(recyclerView.getContext()).resumeRequests();
-                } else {
+                if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
                     Glide.with(recyclerView.getContext()).pauseRequests();
+                } else {
+                    Glide.with(recyclerView.getContext()).resumeRequests();
                 }
             }
 
