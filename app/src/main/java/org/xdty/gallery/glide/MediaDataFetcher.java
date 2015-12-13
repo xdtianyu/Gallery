@@ -10,6 +10,7 @@ import org.xdty.gallery.model.Media;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public class MediaDataFetcher implements DataFetcher<InputStream> {
 
@@ -23,10 +24,21 @@ public class MediaDataFetcher implements DataFetcher<InputStream> {
         this.mediaFile = mediaFile;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public InputStream loadData(Priority priority) throws Exception {
         Log.e(TAG, "loading: " + mediaFile.getUri());
-        data = mediaFile.getInputStream();
+        if (mediaFile.isImage()) {
+            data = mediaFile.getInputStream();
+        } else {
+            List<Media> children = mediaFile.children();
+            for (Media media : children) {
+                if (media.isImage()) {
+                    data = media.getInputStream();
+                    break;
+                }
+            }
+        }
         return data;
     }
 
