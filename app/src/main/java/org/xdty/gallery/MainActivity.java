@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
         notifyListChanged();
 
+        setTitle(getResources().getString(R.string.app_name));
         isRoot = true;
     }
 
@@ -159,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         isRoot = false;
         Media.Builder.setCurrent(media);
 
+        setTitle(media.getName());
         scrollToPosition(media.getPosition());
     }
 
@@ -230,5 +232,10 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                 loadDir(media.parent());
             }
         }
+    }
+
+    @UiThread
+    void setTitle(String title) {
+        super.setTitle(title);
     }
 }
