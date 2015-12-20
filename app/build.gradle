@@ -59,4 +59,6 @@ dependencies {
 
     compile 'com.github.bumptech.glide:glide:3.6.1'
 
+//    compile project(':webdav')
+    compile 'org.xdty.webdav:webdav:0.0.1'
 }
