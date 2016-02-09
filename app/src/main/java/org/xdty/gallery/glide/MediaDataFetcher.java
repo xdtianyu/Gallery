@@ -44,6 +44,7 @@ public class MediaDataFetcher implements DataFetcher<InputStream> {
 
     @Override
     public void cleanup() {
+        Log.d(TAG, "cleanup: " + mediaFile.getUri());
         if (data != null) {
             try {
                 data.close();
@@ -57,11 +58,12 @@ public class MediaDataFetcher implements DataFetcher<InputStream> {
 
     @Override
     public String getId() {
+        Log.d(TAG, "getId: " + mediaFile.getUri());
         return mediaFile.getUri();
     }
 
     @Override
     public void cancel() {
-
+        Log.d(TAG, "cancel: " + mediaFile.getUri());
     }
 }

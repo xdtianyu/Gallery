@@ -21,6 +21,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -311,6 +312,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
             int position = getArguments().getInt(POSITION);
 
             Glide.with(getContext()).load(mMediaFiles.get(position))
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .listener(new RequestListener<Media, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, Media model,
