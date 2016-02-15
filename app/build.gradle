@@ -9,13 +9,32 @@ android {
         applicationId "org.xdty.gallery"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0.0"
+        versionCode project.VERSION_CODE.toInteger()
+        versionName project.VERSION_NAME
+        setProperty("archivesBaseName", "Gallery-v$versionName")
     }
-    buildTypes {
+
+    signingConfigs {
         release {
-            minifyEnabled false
+            storeFile rootProject.file("release.jks")
+            storePassword "${System.env.KEYSTORE_PASSWORD}"
+            keyAlias "${System.env.ALIAS}"
+            keyPassword "${System.env.ALIAS_PASSWORD}"
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -34,23 +53,16 @@ apt {
     }
 }
 
-def AAVersion = '3.3.2'
-
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
-
-    apt "org.androidannotations:androidannotations:$AAVersion"
-    compile "org.androidannotations:androidannotations-api:$AAVersion"
-
+    apt "org.androidannotations:androidannotations:$project.AA_VERSION"
+    compile "org.androidannotations:androidannotations-api:$project.AA_VERSION"
     compile "org.samba.jcifs:jcifs:1.3.17"
     compile 'com.squareup.picasso:picasso:2.5.2'
-
     compile 'com.commit451:PhotoView:1.2.4'
-
     compile 'com.github.bumptech.glide:glide:3.6.1'
-
     compile 'org.xdty.webdav:webdav:0.0.2'
 }
