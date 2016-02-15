@@ -14,7 +14,8 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="org.xdty.gallery.glide.GlideSetup"
-            android:value="GlideModule" />
+            android:value="GlideModule"/>
+
         <activity
             android:name=".MainActivity_"
             android:label="@string/app_name"
@@ -27,9 +28,13 @@
         </activity>
         <activity
             android:name=".ViewerActivity_"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_viewer"
-            android:theme="@style/FullscreenTheme"
-            android:configChanges="orientation|screenSize">
+            android:theme="@style/FullscreenTheme">
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/action_settings">
         </activity>
     </application>
 

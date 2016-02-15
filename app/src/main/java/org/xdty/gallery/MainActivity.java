@@ -193,8 +193,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
     @OptionsItem(R.id.action_settings)
     void settingSelected() {
-        Snackbar.make(toolbar, "Settings", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     @Override
