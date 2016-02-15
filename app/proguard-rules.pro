@@ -17,6 +17,13 @@
 #}
 -dontobfuscate
 
+-keepattributes *Annotation*
+-keepattributes Signature
+
+-dontwarn jcifs.**
+-dontwarn org.androidannotations.**
+-dontwarn org.simpleframework.xml.stream.**
+
 # OKHttp
 -dontwarn rx.**
 
