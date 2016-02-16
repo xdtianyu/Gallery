@@ -26,6 +26,7 @@ import org.xdty.gallery.model.LocalMedia;
 import org.xdty.gallery.model.Media;
 import org.xdty.gallery.model.SambaMedia;
 import org.xdty.gallery.model.WebDavMedia;
+import org.xdty.gallery.utils.Utils;
 import org.xdty.gallery.view.GalleryAdapter;
 
 import java.util.ArrayList;
@@ -63,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                 .penaltyLog()
                 .penaltyDeath()
                 .build());
+
+        Utils.checkLocale(getBaseContext());
 
         setSupportActionBar(toolbar);
 

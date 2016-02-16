@@ -1,12 +1,17 @@
 package org.xdty.gallery.utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.webkit.MimeTypeMap;
 
+import org.xdty.gallery.R;
 import org.xdty.gallery.model.Config;
 
 import java.io.IOException;
@@ -171,6 +176,21 @@ public class Utils {
         }
 
         return inSampleSize;
+    }
+
+    public static void checkLocale(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean isForceChinese =
+                pref.getBoolean(context.getString(R.string.force_chinese_key), false);
+
+        if (isForceChinese) {
+            Locale locale = new Locale("zh");
+            Locale.setDefault(locale);
+            Configuration config = context.getResources().getConfiguration();
+            config.locale = locale;
+            context.getResources().updateConfiguration(config,
+                    context.getResources().getDisplayMetrics());
+        }
     }
 
 }

@@ -9,4 +9,8 @@
     <string name="license">开放源代码许可</string>
     <string name="project_title">开放源代码项目</string>
     <string name="thumbnail">缩略图</string>
+    <string name="advanced">高级</string>
+    <string name="catch_crash">捕获程序异常</string>
+    <string name="catch_crash_message">启用这个功能会抓取程序的崩溃信息，您可以发送这些信息给开发者。请注意如果您是从 Play Store 安装此应用则不需要开启此功能，在应用崩溃后您可以点击报告按钮发送崩溃信息。</string>
+    <string name="force_chinese">始终显示中文</string>
 </resources>

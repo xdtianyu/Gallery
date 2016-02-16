@@ -13,4 +13,11 @@
     <string name="project_url" translatable="false">https://github.com/xdtianyu/Gallery</string>
     <string name="project_title">Open source project</string>
     <string name="license">License</string>
+    <string name="advanced_key" translatable="false">advanced_key</string>
+    <string name="advanced">Advanced</string>
+    <string name="force_chinese_key" translatable="false">force_chinese_key</string>
+    <string name="force_chinese">Use Chinese as app language</string>
+    <string name="catch_crash_key" translatable="false">catch_crash_key</string>
+    <string name="catch_crash">Report crashes</string>
+    <string name="catch_crash_message">This feature allows the app to report technical details to the developer after crash. Please notice that it is not necessary to enable this if you downloaded the app from Play Store, you only need to tap on "Report" button after crash.</string>
 </resources>

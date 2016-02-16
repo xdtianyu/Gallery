@@ -2,6 +2,20 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:tools="http://schemas.android.com/apk/res-auto">
     <com.jenzz.materialpreference.PreferenceCategory
+        android:key="@string/advanced_key"
+        android:title="@string/advanced">
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/force_chinese_key"
+            android:title="@string/force_chinese">
+        </com.jenzz.materialpreference.SwitchPreference>
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/catch_crash_key"
+            android:title="@string/catch_crash">
+        </com.jenzz.materialpreference.SwitchPreference>
+    </com.jenzz.materialpreference.PreferenceCategory>
+    <com.jenzz.materialpreference.PreferenceCategory
         android:key="@string/about_key"
         android:title="@string/about">
 
