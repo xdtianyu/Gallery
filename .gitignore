@@ -45,3 +45,7 @@ obj/
 
 # release key file
 release.jks
+signing.properties
+manifest.properties
+
+*.log

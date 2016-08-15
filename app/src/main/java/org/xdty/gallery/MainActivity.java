@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                     .detectLeakedSqlLiteObjects()
                     .detectLeakedClosableObjects()
                     .penaltyLog()
-                    .penaltyDeath()
+                    //.penaltyDeath()
                     .build());
         }
 
