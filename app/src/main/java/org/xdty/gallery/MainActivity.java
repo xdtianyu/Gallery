@@ -1,17 +1,22 @@
 package org.xdty.gallery;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.StrictMode;
-import android.support.design.widget.Snackbar;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
@@ -25,14 +30,19 @@ import org.androidannotations.annotations.ViewById;
 import org.xdty.gallery.model.LocalMedia;
 import org.xdty.gallery.model.Media;
 import org.xdty.gallery.model.SambaMedia;
+import org.xdty.gallery.model.ServerInfo;
 import org.xdty.gallery.model.WebDavMedia;
 import org.xdty.gallery.utils.Utils;
 import org.xdty.gallery.view.GalleryAdapter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static android.os.Environment.getExternalStorageDirectory;
+
+// TODO: reconstruction
 
 @EActivity(R.layout.activity_main)
 @OptionsMenu(R.menu.menu_main)
@@ -50,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
     GridLayoutManager gridLayoutManager;
     boolean isRoot = false;
     private List<Media> mMediaFileList = new ArrayList<>();
+    private Gson mGson = new Gson();
+    private SharedPreferences mPref;
 
     @AfterViews
     protected void initViews() {
@@ -100,9 +112,9 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                 }
 
                 // can not scroll down and load more
-//                if (!recyclerView.canScrollVertically(1)) {
-//
-//                }
+                //                if (!recyclerView.canScrollVertically(1)) {
+                //
+                //                }
             }
         });
 
@@ -117,15 +129,25 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
             }
         });
 
+        prepareData();
+    }
+
+    void prepareData() {
+
         try {
             Media.Builder.register(new LocalMedia());
             Media.Builder.register(new SambaMedia());
             Media.Builder.register(new WebDavMedia());
 
             Media.Builder.addRoot(getExternalStorageDirectory().getAbsolutePath(), null, null);
-            Media.Builder.addRoot("smb://192.168.2.150/sdb1", "YOUR_USER", "YOUR_PASSWORD");
-            Media.Builder.addRoot("smb://192.168.2.110/mnt", "YOUR_USER", "YOUR_PASSWORD");
-            Media.Builder.addRoot("davs://www.example.com/usb", "YOUR_USER", "YOUR_PASSWORD");
+
+            mPref = PreferenceManager.getDefaultSharedPreferences(this);
+            Set<String> servers = mPref.getStringSet("server_list", new HashSet<String>());
+            for (String server : servers) {
+                ServerInfo info = mGson.fromJson(server, ServerInfo.class);
+                Media.Builder.addRoot(info.getUri(), info.getUser(), info.getPass());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -192,8 +214,39 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
     @Click
     void fab(View view) {
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        View layout = View.inflate(this, R.layout.dialog_add_server, null);
+
+        final EditText uriText = (EditText) layout.findViewById(R.id.uri);
+        final EditText userText = (EditText) layout.findViewById(R.id.username);
+        final EditText passText = (EditText) layout.findViewById(R.id.password);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.add_server)
+                .setView(layout)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // save server info
+                        String uri = uriText.getText().toString();
+                        String user = userText.getText().toString();
+                        String pass = passText.getText().toString();
+
+                        String server = mGson.toJson(new ServerInfo(uri, user, pass));
+                        Set<String> servers = mPref.getStringSet("server_list",
+                                new HashSet<String>());
+
+                        servers.add(server);
+
+                        mPref.edit().putStringSet("server_list", servers).apply();
+
+                        Media.Builder.addRoot(uri, user, pass);
+
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .setNeutralButton(R.string.add_server_help, null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @OptionsItem(R.id.action_settings)

@@ -96,6 +96,8 @@ dependencies {
 
     compile 'com.github.satyan:sugar:1.5'
 
+    compile 'com.google.code.gson:gson:2.7'
+
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.9'
     compile 'com.google.dagger:dagger:2.6'

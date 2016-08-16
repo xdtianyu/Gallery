@@ -23,4 +23,8 @@
     <string name="customactivityoncrash_error_activity_error_details_copied">已复制到剪切板</string>
     <string name="customactivityoncrash_error_activity_error_details_clipboard_label">错误信息</string>
     <string name="force_chinese">始终显示中文</string>
+    <string name="add_server">添加服务器</string>
+    <string name="password">密码</string>
+    <string name="uri">服务器地址</string>
+    <string name="username">用户名</string>
 </resources>

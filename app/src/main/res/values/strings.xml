@@ -30,4 +30,11 @@
     <string name="customactivityoncrash_error_activity_error_occurred_explanation">An unexpected error occurred.\nSorry for the inconvenience.</string>
     <string name="customactivityoncrash_error_activity_restart_app">Restart app</string>
     <string name="customactivityoncrash_error_activity_unknown_exception">Unknown exception</string>
+    <string name="add_server">Add server</string>
+    <string name="uri">Server uri</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_server_help">Help</string>
 </resources>
