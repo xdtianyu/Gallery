@@ -27,4 +27,7 @@
     <string name="password">密码</string>
     <string name="uri">服务器地址</string>
     <string name="username">用户名</string>
+    <string name="add_server_help">帮助</string>
+    <string name="cancel">取消</string>
+    <string name="ok">确定</string>
 </resources>

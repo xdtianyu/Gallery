@@ -12,8 +12,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.xdty.gallery.R;
+import org.xdty.gallery.contract.MainContact;
 import org.xdty.gallery.model.Media;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
@@ -22,24 +24,18 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     private static final int TYPE_MEDIA = 1000;
 
-    private final LayoutInflater mLayoutInflater;
-    private List<Media> mMediaFiles;
+    private List<Media> mMedias;
+    private MainContact.Presenter mPresenter;
 
-    private Context mContext;
-
-    private OnItemClickListener mOnItemClickListener;
-
-    public GalleryAdapter(Context context, List<Media> mediaFiles, OnItemClickListener listener) {
-        mContext = context;
-        mMediaFiles = mediaFiles;
-        mOnItemClickListener = listener;
-
-        mLayoutInflater = LayoutInflater.from(context);
+    public GalleryAdapter(MainContact.Presenter presenter) {
+        mMedias = new ArrayList<>();
+        mPresenter = presenter;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new MediaViewHolder(mLayoutInflater.inflate(R.layout.item_media, parent, false));
+        return new MediaViewHolder(LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_media, parent, false));
     }
 
     @Override
@@ -54,28 +50,33 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mMediaFiles.size();
+        return mMedias.size();
     }
 
-    public interface OnItemClickListener {
-        void onItemClicked(int position, Media mediaFile);
+    public void replaceData(List<Media> mediaList) {
+        mMedias = mediaList;
+        notifyDataSetChanged();
     }
 
-    public class MediaViewHolder extends RecyclerView.ViewHolder implements IViewHolder {
+    private class MediaViewHolder extends RecyclerView.ViewHolder implements IViewHolder {
 
         SquareImageView thumbnail;
         TextView name;
-
         int position;
         Media mediaFile;
 
-        public MediaViewHolder(View view) {
+        private Context mContext;
+
+        MediaViewHolder(View view) {
             super(view);
+
+            mContext = view.getContext();
+
             thumbnail = (SquareImageView) view.findViewById(R.id.thumbnail);
             thumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnItemClickListener.onItemClicked(position, mediaFile);
+                    mPresenter.clickItem(position, mediaFile);
                 }
             });
 
@@ -85,8 +86,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
         @Override
         public void bindViews(int position) {
             this.position = position;
-            mediaFile = mMediaFiles.get(position);
-//            Log.d(TAG, "path: " + mediaFile.getPath());
+            mediaFile = mMedias.get(position);
 
             name.setText(mediaFile.getName());
 

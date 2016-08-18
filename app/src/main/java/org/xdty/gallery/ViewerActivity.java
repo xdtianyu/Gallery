@@ -6,6 +6,8 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -26,13 +29,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.Background;
-import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.OptionsItem;
-import org.androidannotations.annotations.OptionsMenu;
-import org.androidannotations.annotations.UiThread;
-import org.androidannotations.annotations.ViewById;
+import org.xdty.gallery.contract.ViewerContact;
 import org.xdty.gallery.model.Media;
 
 import java.util.ArrayList;
@@ -41,33 +38,31 @@ import java.util.List;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
-@EActivity(R.layout.activity_viewer)
-@OptionsMenu(R.menu.menu_viewer)
-public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener,
+        ViewerContact.View {
 
     public static final String TAG = ViewerActivity.class.getSimpleName();
 
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final String POSITION = "position";
     private static List<Media> mMediaFiles = new ArrayList<>();
-    //    @ViewById(R.id.main_content)
-//    CoordinatorLayout coordinatorLayout;
-//    @ViewById
-//    AppBarLayout appBar;
-    @ViewById
+
     Toolbar toolbar;
-    //    @ViewById
-//    FloatingActionButton fab;
-    @ViewById(R.id.container)
     ViewPager viewPager;
+
     PagerAdapter mPagerAdapter;
     private Handler mHandler = new Handler();
     private Runnable hideSystemUIRunnable;
     private int mSelectedPosition = -1;
 
-    @AfterViews
-    protected void initViews() {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_viewer);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        viewPager = (ViewPager) findViewById(R.id.container);
         int position = getIntent().getIntExtra("position", 0);
         String uri = getIntent().getStringExtra("uri");
         String host = getIntent().getStringExtra("host");
@@ -84,14 +79,6 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         hideSystemUIDelayed(0);
     }
 
-//    @Click
-//    void fab(View view) {
-//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show();
-//    }
-
-    @SuppressWarnings("unchecked")
-    @Background
     void loadData(String uri, String host, int position) {
         notifyDataSetChanged(Media.Builder.getCurrent().children());
         setCurrentItem(position);
@@ -109,10 +96,15 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         viewPager.setCurrentItem(position, false);
     }
 
-    @OptionsItem(R.id.action_settings)
-    void settingSelected() {
-        Snackbar.make(toolbar, "Settings", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Snackbar.make(toolbar, "Settings", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @UiThread
@@ -153,7 +145,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
         cancelHideSystemUIDelayed();
 
-//        appBar.setVisibility(View.VISIBLE);
+        //        appBar.setVisibility(View.VISIBLE);
 
         if (toolbar.getVisibility() == View.INVISIBLE) {
             toolbar.setVisibility(View.VISIBLE);
@@ -184,7 +176,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @UiThread
     public void hideSystemUI() {
 
-//        appBar.setVisibility(View.GONE);
+        //        appBar.setVisibility(View.GONE);
         toolbar.animate().translationY(-toolbar.getBottom()).setInterpolator(
                 new AccelerateInterpolator()).start();
 
@@ -232,7 +224,6 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         super.onDestroy();
     }
 
-    @Background
     public void updateOrientation(int width, int height) {
 
         if (width == height) {
@@ -263,8 +254,12 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     }
 
-    public static class ImageFragment extends Fragment {
+    @Override
+    public void setPresenter(ViewerContact.Presenter presenter) {
 
+    }
+
+    public static class ImageFragment extends Fragment {
 
         private boolean isOrientationUpdated = false;
         private boolean isVisibleToUser = false;

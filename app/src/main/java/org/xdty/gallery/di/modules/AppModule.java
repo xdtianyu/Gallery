@@ -2,6 +2,8 @@ package org.xdty.gallery.di.modules;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+
 import org.xdty.gallery.application.Application;
 import org.xdty.gallery.model.setting.Setting;
 import org.xdty.gallery.model.setting.SettingImpl;
@@ -36,6 +38,12 @@ public class AppModule {
     @Provides
     Setting provideSetting() {
         return new SettingImpl(mApplication);
+    }
+
+    @Singleton
+    @Provides
+    Gson provideGson() {
+        return new Gson();
     }
 
 }

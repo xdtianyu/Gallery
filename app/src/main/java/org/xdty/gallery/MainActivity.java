@@ -2,9 +2,9 @@ package org.xdty.gallery;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.StrictMode;
-import android.preference.PreferenceManager;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,83 +12,83 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
 import com.bumptech.glide.Glide;
-import com.google.gson.Gson;
 
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.Background;
-import org.androidannotations.annotations.Click;
-import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.OnActivityResult;
-import org.androidannotations.annotations.OptionsItem;
-import org.androidannotations.annotations.OptionsMenu;
-import org.androidannotations.annotations.UiThread;
-import org.androidannotations.annotations.ViewById;
-import org.xdty.gallery.model.LocalMedia;
+import org.xdty.gallery.application.Application;
+import org.xdty.gallery.contract.MainContact;
+import org.xdty.gallery.di.DaggerMainComponent;
+import org.xdty.gallery.di.modules.AppModule;
+import org.xdty.gallery.di.modules.MainModule;
 import org.xdty.gallery.model.Media;
-import org.xdty.gallery.model.SambaMedia;
-import org.xdty.gallery.model.ServerInfo;
-import org.xdty.gallery.model.WebDavMedia;
 import org.xdty.gallery.utils.Utils;
 import org.xdty.gallery.view.GalleryAdapter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import static android.os.Environment.getExternalStorageDirectory;
+import javax.inject.Inject;
 
-// TODO: reconstruction
-
-@EActivity(R.layout.activity_main)
-@OptionsMenu(R.menu.menu_main)
-public class MainActivity extends AppCompatActivity implements GalleryAdapter.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements MainContact.View {
 
     public final static String TAG = MainActivity.class.getSimpleName();
     public final static int REQUEST_POSITION = 1000;
-    @ViewById
-    Toolbar toolbar;
-    @ViewById
-    SwipeRefreshLayout swipeRefreshLayout;
-    @ViewById
-    RecyclerView recyclerView;
-    GalleryAdapter galleryAdapter;
-    GridLayoutManager gridLayoutManager;
-    boolean isRoot = false;
-    private List<Media> mMediaFileList = new ArrayList<>();
-    private Gson mGson = new Gson();
-    private SharedPreferences mPref;
 
-    @AfterViews
-    protected void initViews() {
+    @Inject
+    MainContact.Presenter mMainPresenter;
 
-        if (BuildConfig.DEBUG) {
-            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                    .detectAll()
-                    .penaltyLog()
-                    .build());
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectLeakedSqlLiteObjects()
-                    .detectLeakedClosableObjects()
-                    .penaltyLog()
-                    //.penaltyDeath()
-                    .build());
-        }
+    private Toolbar mToolbar;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private RecyclerView mRecyclerView;
+    private FloatingActionButton mFab;
+
+    private GalleryAdapter mGalleryAdapter;
+    private GridLayoutManager mGridLayoutManager;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        DaggerMainComponent.builder()
+                .appModule(new AppModule((Application) getApplication()))
+                .mainModule(new MainModule(MainActivity.this))
+                .build()
+                .inject(this);
 
         Utils.checkLocale(getBaseContext());
 
-        setSupportActionBar(toolbar);
+        setupViews();
 
-        gridLayoutManager = new GridLayoutManager(this, 3);
-        recyclerView.setLayoutManager(gridLayoutManager);
-        galleryAdapter = new GalleryAdapter(this, mMediaFileList, this);
-        recyclerView.setAdapter(galleryAdapter);
+        mMainPresenter.start();
+    }
 
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+    private void setupViews() {
+
+        setContentView(R.layout.activity_main);
+
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        setSupportActionBar(mToolbar);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAddServerDialog();
+            }
+        });
+
+        mGridLayoutManager = new GridLayoutManager(this, 3);
+        mRecyclerView.setLayoutManager(mGridLayoutManager);
+        mGalleryAdapter = new GalleryAdapter(mMainPresenter);
+        mRecyclerView.setAdapter(mGalleryAdapter);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -106,114 +106,34 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
 
                 // can scroll up and disable refresh
                 if (recyclerView.canScrollVertically(-1)) {
-                    swipeRefreshLayout.setEnabled(false);
+                    mSwipeRefreshLayout.setEnabled(false);
                 } else {
-                    swipeRefreshLayout.setEnabled(true);
+                    mSwipeRefreshLayout.setEnabled(true);
                 }
 
                 // can not scroll down and load more
-                //                if (!recyclerView.canScrollVertically(1)) {
+                //                if (!mRecyclerView.canScrollVertically(1)) {
                 //
                 //                }
             }
         });
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (isRoot) {
-                    loadRootDir();
-                } else {
-                    loadDir(Media.Builder.getCurrent(), true);
-                }
+                mMainPresenter.reFresh();
             }
         });
 
-        prepareData();
     }
 
-    void prepareData() {
-
-        try {
-            Media.Builder.register(new LocalMedia());
-            Media.Builder.register(new SambaMedia());
-            Media.Builder.register(new WebDavMedia());
-
-            Media.Builder.addRoot(getExternalStorageDirectory().getAbsolutePath(), null, null);
-
-            mPref = PreferenceManager.getDefaultSharedPreferences(this);
-            Set<String> servers = mPref.getStringSet("server_list", new HashSet<String>());
-            for (String server : servers) {
-                ServerInfo info = mGson.fromJson(server, ServerInfo.class);
-                Media.Builder.addRoot(info.getUri(), info.getUser(), info.getPass());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        loadRootDir();
+    @Override
+    public void replaceData(List<Media> mediaList) {
+        mGalleryAdapter.replaceData(mediaList);
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
-    @Background
-    void loadRootDir() {
-
-        mMediaFileList.clear();
-        mMediaFileList.addAll(Media.Builder.roots());
-
-        Media.Builder.setCurrent(null);
-
-        notifyListChanged();
-
-        setTitle(getResources().getString(R.string.app_name));
-        isRoot = true;
-    }
-
-    void loadDir(Media media) {
-        loadDir(media, false);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Background
-    void loadDir(Media media, boolean isRefresh) {
-        long start = System.currentTimeMillis();
-
-        if (isRefresh) {
-            media.clear();
-        }
-
-        List<Media> medias = media.children();
-        mMediaFileList.clear();
-
-        for (Media m : medias) {
-            if (m.isImage() || m.isDirectory()) {
-                mMediaFileList.add(m);
-            }
-        }
-        Log.e("aaa", "" + (System.currentTimeMillis() - start));
-
-        notifyListChanged();
-
-        isRoot = false;
-        Media.Builder.setCurrent(media);
-
-        setTitle(media.getName());
-        scrollToPosition(media.getPosition());
-    }
-
-    @UiThread
-    void scrollToPosition(int position) {
-        Log.d(TAG, "position: " + position);
-        gridLayoutManager.scrollToPositionWithOffset(position, 0);
-    }
-
-    @UiThread
-    void notifyListChanged() {
-        galleryAdapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);
-    }
-
-    @Click
-    void fab(View view) {
+    void showAddServerDialog() {
         View layout = View.inflate(this, R.layout.dialog_add_server, null);
 
         final EditText uriText = (EditText) layout.findViewById(R.id.uri);
@@ -231,15 +151,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
                         String user = userText.getText().toString();
                         String pass = passText.getText().toString();
 
-                        String server = mGson.toJson(new ServerInfo(uri, user, pass));
-                        Set<String> servers = mPref.getStringSet("server_list",
-                                new HashSet<String>());
-
-                        servers.add(server);
-
-                        mPref.edit().putStringSet("server_list", servers).apply();
-
-                        Media.Builder.addRoot(uri, user, pass);
+                        mMainPresenter.addServer(uri, user, pass);
 
                     }
                 })
@@ -249,59 +161,71 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.On
         dialog.show();
     }
 
-    @OptionsItem(R.id.action_settings)
-    void settingSelected() {
-        startActivity(new Intent(this, SettingsActivity.class));
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onItemClicked(int position, Media media) {
         if (media.isImage()) {
             Glide.with(this).pauseRequests();
-            Intent intent = new Intent(this, ViewerActivity_.class);
+            Intent intent = new Intent(this, ViewerActivity.class);
             intent.putExtra("uri", media.getParent());
             intent.putExtra("host", media.getHost());
             intent.putExtra("position", position);
             startActivityForResult(intent, REQUEST_POSITION);
         } else {
-            Media current = media.parent();
-            if (current != null) {
-                current.setPosition(gridLayoutManager.findFirstVisibleItemPosition());
-            }
-
-            loadDir(media);
+            mMainPresenter.loadChild(mGridLayoutManager.findFirstVisibleItemPosition(), media);
         }
     }
 
-    @OnActivityResult(REQUEST_POSITION)
-    void onResult(@OnActivityResult.Extra int position) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_POSITION:
+                int position = data.getIntExtra("position", 0);
+
+                break;
+        }
+    }
+
+    @Override
+    public void scrollToPosition(int position) {
         Log.d(TAG, "position: " + position);
-        int start = gridLayoutManager.findFirstCompletelyVisibleItemPosition();
-        int end = gridLayoutManager.findLastCompletelyVisibleItemPosition();
+        int start = mGridLayoutManager.findFirstCompletelyVisibleItemPosition();
+        int end = mGridLayoutManager.findLastCompletelyVisibleItemPosition();
 
         if (position < start || position > end) {
-            scrollToPosition(position);
+            mGridLayoutManager.scrollToPositionWithOffset(position, 0);
         }
     }
 
     @Override
     public void onBackPressed() {
-        if (isRoot) {
+
+        mRecyclerView.computeVerticalScrollOffset();
+
+        if (!mMainPresenter.loadParent(mGridLayoutManager.findFirstVisibleItemPosition())) {
             super.onBackPressed();
-        } else {
-            Media media = Media.Builder.getCurrent();
-            if (media == null || media.parent() == null) {
-                loadRootDir();
-            } else {
-                recyclerView.computeVerticalScrollOffset();
-                media.setPosition(gridLayoutManager.findFirstVisibleItemPosition());
-                loadDir(media.parent());
-            }
         }
     }
 
-    @UiThread
-    void setTitle(String title) {
+    @Override
+    public void setTitle(String title) {
+        if (title == null) {
+            title = getResources().getString(R.string.app_name);
+        }
         super.setTitle(title);
+    }
+
+    @Override
+    public void setPresenter(MainContact.Presenter presenter) {
+
     }
 }

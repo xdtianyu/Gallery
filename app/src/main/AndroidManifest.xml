@@ -18,7 +18,7 @@
             android:value="GlideModule"/>
 
         <activity
-            android:name=".MainActivity_"
+            android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ViewerActivity_"
+            android:name=".ViewerActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_viewer"
             android:theme="@style/FullscreenTheme">
