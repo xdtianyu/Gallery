@@ -16,6 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +55,12 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     private Handler mHandler = new Handler();
     private Runnable hideSystemUIRunnable;
     private int mSelectedPosition = -1;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_viewer, menu);
+        return true;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
