@@ -5,6 +5,8 @@ import android.content.Context;
 import com.google.gson.Gson;
 
 import org.xdty.gallery.application.Application;
+import org.xdty.gallery.data.MediaDataSource;
+import org.xdty.gallery.data.MediaRepository;
 import org.xdty.gallery.model.setting.Setting;
 import org.xdty.gallery.model.setting.SettingImpl;
 
@@ -44,6 +46,12 @@ public class AppModule {
     @Provides
     Gson provideGson() {
         return new Gson();
+    }
+
+    @Singleton
+    @Provides
+    MediaDataSource provideMediaDataSource() {
+        return new MediaRepository();
     }
 
 }

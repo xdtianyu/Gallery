@@ -1,12 +1,12 @@
 package org.xdty.gallery.presenter;
 
 import android.os.Environment;
-import android.util.Log;
 
 import com.google.gson.Gson;
 
 import org.xdty.gallery.application.Application;
 import org.xdty.gallery.contract.MainContact;
+import org.xdty.gallery.data.MediaDataSource;
 import org.xdty.gallery.model.LocalMedia;
 import org.xdty.gallery.model.Media;
 import org.xdty.gallery.model.SambaMedia;
@@ -20,11 +20,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class MainPresenter implements MainContact.Presenter {
 
@@ -33,6 +29,9 @@ public class MainPresenter implements MainContact.Presenter {
 
     @Inject
     Gson mGson;
+
+    @Inject
+    MediaDataSource mMediaDataSource;
 
     MainContact.View mView;
 
@@ -136,8 +135,12 @@ public class MainPresenter implements MainContact.Presenter {
         isRoot = true;
     }
 
-    private void loadDir(final Media media) {
-        loadDir(media, false).subscribe(new Action1<List<Media>>() {
+    private void loadDir(Media media) {
+        loadDir(media, false);
+    }
+
+    private void loadDir(final Media media, final boolean isRefresh) {
+        mMediaDataSource.loadDir(media, isRefresh).subscribe(new Action1<List<Media>>() {
             @Override
             public void call(List<Media> medias) {
                 mView.replaceData(medias);
@@ -149,31 +152,5 @@ public class MainPresenter implements MainContact.Presenter {
                 mView.scrollToPosition(media.getPosition());
             }
         });
-    }
-
-    private Observable<List<Media>> loadDir(final Media media, final boolean isRefresh) {
-        return Observable.create(new Observable.OnSubscribe<List<Media>>() {
-
-            @Override
-            public void call(Subscriber<? super List<Media>> subscriber) {
-                long start = System.currentTimeMillis();
-
-                if (isRefresh) {
-                    media.clear();
-                }
-
-                List<Media> medias = media.children();
-                List<Media> list = new ArrayList<>();
-
-                for (Media m : medias) {
-                    if (m.isImage() || m.isDirectory()) {
-                        list.add(m);
-                    }
-                }
-                Log.e("aaa", "" + (System.currentTimeMillis() - start));
-
-                subscriber.onNext(list);
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 }
