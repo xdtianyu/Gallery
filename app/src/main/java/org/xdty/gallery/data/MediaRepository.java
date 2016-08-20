@@ -1,7 +1,5 @@
 package org.xdty.gallery.data;
 
-import android.util.Log;
-
 import org.xdty.gallery.application.Application;
 import org.xdty.gallery.model.Media;
 
@@ -34,6 +32,26 @@ public class MediaRepository implements MediaDataSource {
 
                 for (Media m : medias) {
                     if (m.isImage() || m.isDirectory()) {
+                        list.add(m);
+                    }
+                }
+                subscriber.onNext(list);
+            }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    @Override
+    public Observable<List<Media>> loadMediaList(final Media media) {
+        return Observable.create(new Observable.OnSubscribe<List<Media>>() {
+
+            @Override
+            public void call(Subscriber<? super List<Media>> subscriber) {
+
+                List<Media> medias = media.children();
+                List<Media> list = new ArrayList<>();
+
+                for (Media m : medias) {
+                    if (m.isImage()) {
                         list.add(m);
                     }
                 }

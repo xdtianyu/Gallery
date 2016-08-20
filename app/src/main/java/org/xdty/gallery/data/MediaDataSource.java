@@ -7,5 +7,9 @@ import java.util.List;
 import rx.Observable;
 
 public interface MediaDataSource {
+
     Observable<List<Media>> loadDir(Media media, boolean isRefresh);
+
+    Observable<List<Media>> loadMediaList(Media media);
+
 }
