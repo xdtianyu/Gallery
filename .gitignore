@@ -49,3 +49,4 @@ signing.properties
 manifest.properties
 
 *.log
+captures/

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.xdty.gallery.R;
@@ -92,11 +93,15 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
             if (mediaFile.isImage()) {
                 Glide.with(mContext).load(mediaFile)
+                        .asBitmap()
+                        .format(DecodeFormat.PREFER_RGB_565)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         .fitCenter().centerCrop().into(thumbnail);
                 name.setVisibility(View.GONE);
             } else {
                 Glide.with(mContext).load(mediaFile)
+                        .asBitmap()
+                        .format(DecodeFormat.PREFER_RGB_565)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         .placeholder(R.drawable.folder)
                         .error(R.drawable.folder)

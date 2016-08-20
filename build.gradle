@@ -35,7 +35,7 @@ ext {
     minSdkVersion = 16
     targetSdkVersion = 24
 
-    supportVersion = "24.1.1"
+    supportVersion = "24.2.0"
 
     aaVersion = "3.3.2"
 }
