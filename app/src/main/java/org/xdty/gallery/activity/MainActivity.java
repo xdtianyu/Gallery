@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements MainContact.View 
         switch (requestCode) {
             case REQUEST_POSITION:
                 int position = data.getIntExtra("position", 0);
-
+                scrollToPosition(position);
                 break;
         }
     }

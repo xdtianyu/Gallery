@@ -1,5 +1,6 @@
 package org.xdty.gallery.application;
 
+import org.xdty.gallery.BuildConfig;
 import org.xdty.gallery.di.AppComponent;
 import org.xdty.gallery.di.DaggerAppComponent;
 import org.xdty.gallery.di.modules.AppModule;
@@ -27,7 +28,7 @@ public class Application extends android.app.Application {
         sAppComponent = DaggerAppComponent.builder().appModule(new AppModule(this)).build();
         sAppComponent.inject(this);
 
-        if (mSetting.isCatchCrashEnable()) {
+        if (BuildConfig.DEBUG || mSetting.isCatchCrashEnable()) {
             CustomActivityOnCrash.install(this);
         }
     }

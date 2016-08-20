@@ -15,7 +15,7 @@ import rx.functions.Action1;
 public class ViewerPresenter implements ViewerContact.Presenter {
 
     @Inject
-    protected MediaDataSource mDataSource;
+    MediaDataSource mDataSource;
 
     private ViewerContact.View mView;
 
