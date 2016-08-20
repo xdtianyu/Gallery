@@ -31,7 +31,7 @@ public class MainPresenter implements MainContact.Presenter {
     @Inject
     MediaDataSource mMediaDataSource;
 
-    MainContact.View mView;
+    private MainContact.View mView;
 
     boolean isRoot = false;
 

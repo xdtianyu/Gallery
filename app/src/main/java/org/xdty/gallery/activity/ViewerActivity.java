@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.annotation.UiThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -20,12 +19,17 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 import org.xdty.gallery.R;
+import org.xdty.gallery.application.Application;
 import org.xdty.gallery.contract.ViewerContact;
+import org.xdty.gallery.di.DaggerViewerComponent;
+import org.xdty.gallery.di.modules.AppModule;
+import org.xdty.gallery.di.modules.ViewerModule;
 import org.xdty.gallery.model.Media;
 import org.xdty.gallery.view.PagerAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import static org.xdty.gallery.utils.Constants.HOST;
 import static org.xdty.gallery.utils.Constants.POSITION;
@@ -37,15 +41,44 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     public static final String TAG = ViewerActivity.class.getSimpleName();
 
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-    private List<Media> mMediaFiles = new ArrayList<>();
+
+    @Inject
+    protected ViewerContact.Presenter mPresenter;
 
     private Toolbar mToolbar;
     private ViewPager mViewPager;
-
     private PagerAdapter mPagerAdapter;
     private Handler mHandler = new Handler();
     private Runnable hideSystemUIRunnable;
-    private int mSelectedPosition = -1;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        DaggerViewerComponent.builder()
+                .appModule(new AppModule((Application) getApplication()))
+                .viewerModule(new ViewerModule(this))
+                .build().inject(this);
+
+        setContentView(R.layout.activity_viewer);
+
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mViewPager = (ViewPager) findViewById(R.id.container);
+
+        setSupportActionBar(mToolbar);
+
+        int position = getIntent().getIntExtra(POSITION, 0);
+        String uri = getIntent().getStringExtra(URI);
+        String host = getIntent().getStringExtra(HOST);
+
+        mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mPagerAdapter);
+        mViewPager.addOnPageChangeListener(this);
+
+        hideSystemUIDelayed(0);
+
+        mPresenter.loadData(uri, host, position);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -54,45 +87,18 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_viewer);
-
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mViewPager = (ViewPager) findViewById(R.id.container);
-
-        int position = getIntent().getIntExtra(POSITION, 0);
-        String uri = getIntent().getStringExtra(URI);
-        String host = getIntent().getStringExtra(HOST);
-
-        setSupportActionBar(mToolbar);
-
-        mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), mMediaFiles);
-        mViewPager.setAdapter(mPagerAdapter);
-
-        mViewPager.addOnPageChangeListener(this);
-
-        loadData(uri, host, position);
-
-        hideSystemUIDelayed(0);
+    public void replaceData(List<Media> medias) {
+        mPagerAdapter.replaceData(medias);
     }
 
-    void loadData(String uri, String host, int position) {
-        notifyDataSetChanged(Media.Builder.getCurrent().children());
-        setCurrentItem(position);
-    }
-
-    @UiThread
-    void notifyDataSetChanged(List<Media> mediaFiles) {
-        mMediaFiles.clear();
-        mMediaFiles.addAll(mediaFiles);
-        mPagerAdapter.notifyDataSetChanged();
-    }
-
-    @UiThread
-    void setCurrentItem(int position) {
+    @Override
+    public void setCurrentItem(int position) {
         mViewPager.setCurrentItem(position, false);
+    }
+
+    @Override
+    public void setTitle(String name) {
+        super.setTitle(name);
     }
 
     @Override
@@ -106,7 +112,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         return super.onOptionsItemSelected(item);
     }
 
-    @UiThread
+    @Override
     public void hideSystemUIDelayed(int timeout) {
 
         if (hideSystemUIRunnable == null) {
@@ -122,13 +128,14 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         mHandler.postDelayed(hideSystemUIRunnable, timeout);
     }
 
-    @UiThread
+    @Override
     public void cancelHideSystemUIDelayed() {
         if (hideSystemUIRunnable != null) {
             mHandler.removeCallbacks(hideSystemUIRunnable);
         }
     }
 
+    @Override
     public boolean isSystemUIVisible() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             return (getWindow().getDecorView().getSystemUiVisibility() &
@@ -139,7 +146,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         }
     }
 
-    @UiThread
+    @Override
     public void showSystemUI(boolean autoHide) {
 
         cancelHideSystemUIDelayed();
@@ -175,7 +182,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         }
     }
 
-    @UiThread
+    @Override
     public void hideSystemUI() {
 
         //        appBar.setVisibility(View.GONE);
@@ -207,7 +214,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public void onBackPressed() {
         Intent intent = new Intent();
-        intent.putExtra(POSITION, mSelectedPosition);
+        intent.putExtra(POSITION, mPresenter.getPosition());
         setResult(RESULT_OK, intent);
         super.onBackPressed();
     }
@@ -219,13 +226,16 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     protected void onDestroy() {
-        mMediaFiles.clear();
+        mPagerAdapter.clear();
         mViewPager.clearOnPageChangeListeners();
         mViewPager.setAdapter(null);
         mPagerAdapter = null;
+        mPresenter.clear();
+        mPresenter = null;
         super.onDestroy();
     }
 
+    @Override
     public void updateOrientation(int width, int height) {
 
         if (width == height) {
@@ -246,9 +256,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     public void onPageSelected(int position) {
-        Media media = mMediaFiles.get(position);
-        setTitle(media.getName());
-        mSelectedPosition = position;
+        mPresenter.pageSelected(position);
     }
 
     @Override
@@ -260,7 +268,5 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     public void setPresenter(ViewerContact.Presenter presenter) {
 
     }
-
-
 
 }
