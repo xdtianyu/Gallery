@@ -4,10 +4,8 @@ import android.os.StrictMode;
 
 import com.facebook.stetho.Stetho;
 
-import org.xdty.gallery.application.Application;
-
 public class DebugApplication extends Application {
-    public final static String TAG = DebugApplication.class.getSimpleName();
+    private final static String TAG = DebugApplication.class.getSimpleName();
 
     @Override
     public void onCreate() {

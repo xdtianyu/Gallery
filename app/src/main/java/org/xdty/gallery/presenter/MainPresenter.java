@@ -1,7 +1,5 @@
 package org.xdty.gallery.presenter;
 
-import android.os.Environment;
-
 import com.google.gson.Gson;
 
 import org.xdty.gallery.application.Application;
@@ -12,7 +10,7 @@ import org.xdty.gallery.model.Media;
 import org.xdty.gallery.model.SambaMedia;
 import org.xdty.gallery.model.ServerInfo;
 import org.xdty.gallery.model.WebDavMedia;
-import org.xdty.gallery.model.setting.Setting;
+import org.xdty.gallery.setting.Setting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +49,7 @@ public class MainPresenter implements MainContact.Presenter {
             Media.Builder.register(new SambaMedia());
             Media.Builder.register(new WebDavMedia());
 
-            Media.Builder.addRoot(Environment.getExternalStorageDirectory().getAbsolutePath(), null,
-                    null);
+            Media.Builder.addRoot(mSetting.getLocalPath(), null, null);
 
             Set<String> servers = mSetting.getServers();
             for (String server : servers) {

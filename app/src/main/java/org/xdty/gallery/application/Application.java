@@ -3,7 +3,7 @@ package org.xdty.gallery.application;
 import org.xdty.gallery.di.AppComponent;
 import org.xdty.gallery.di.DaggerAppComponent;
 import org.xdty.gallery.di.modules.AppModule;
-import org.xdty.gallery.model.setting.Setting;
+import org.xdty.gallery.setting.Setting;
 
 import javax.inject.Inject;
 

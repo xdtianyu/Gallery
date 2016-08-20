@@ -1,6 +1,6 @@
 package org.xdty.gallery.di;
 
-import org.xdty.gallery.MainActivity;
+import org.xdty.gallery.activity.MainActivity;
 import org.xdty.gallery.di.modules.AppModule;
 import org.xdty.gallery.di.modules.MainModule;
 

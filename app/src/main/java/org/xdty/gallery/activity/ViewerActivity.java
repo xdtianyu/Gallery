@@ -1,4 +1,4 @@
-package org.xdty.gallery;
+package org.xdty.gallery.activity;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -9,35 +9,27 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-
+import org.xdty.gallery.R;
 import org.xdty.gallery.contract.ViewerContact;
 import org.xdty.gallery.model.Media;
+import org.xdty.gallery.view.PagerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.co.senab.photoview.PhotoView;
-import uk.co.senab.photoview.PhotoViewAttacher;
+import static org.xdty.gallery.utils.Constants.HOST;
+import static org.xdty.gallery.utils.Constants.POSITION;
+import static org.xdty.gallery.utils.Constants.URI;
 
 public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener,
         ViewerContact.View {
@@ -45,13 +37,12 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     public static final String TAG = ViewerActivity.class.getSimpleName();
 
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-    private static final String POSITION = "position";
-    private static List<Media> mMediaFiles = new ArrayList<>();
+    private List<Media> mMediaFiles = new ArrayList<>();
 
-    Toolbar toolbar;
-    ViewPager viewPager;
+    private Toolbar mToolbar;
+    private ViewPager mViewPager;
 
-    PagerAdapter mPagerAdapter;
+    private PagerAdapter mPagerAdapter;
     private Handler mHandler = new Handler();
     private Runnable hideSystemUIRunnable;
     private int mSelectedPosition = -1;
@@ -68,18 +59,19 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
         setContentView(R.layout.activity_viewer);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        viewPager = (ViewPager) findViewById(R.id.container);
-        int position = getIntent().getIntExtra("position", 0);
-        String uri = getIntent().getStringExtra("uri");
-        String host = getIntent().getStringExtra("host");
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mViewPager = (ViewPager) findViewById(R.id.container);
 
-        setSupportActionBar(toolbar);
+        int position = getIntent().getIntExtra(POSITION, 0);
+        String uri = getIntent().getStringExtra(URI);
+        String host = getIntent().getStringExtra(HOST);
 
-        mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(mPagerAdapter);
+        setSupportActionBar(mToolbar);
 
-        viewPager.addOnPageChangeListener(this);
+        mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), mMediaFiles);
+        mViewPager.setAdapter(mPagerAdapter);
+
+        mViewPager.addOnPageChangeListener(this);
 
         loadData(uri, host, position);
 
@@ -100,14 +92,14 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @UiThread
     void setCurrentItem(int position) {
-        viewPager.setCurrentItem(position, false);
+        mViewPager.setCurrentItem(position, false);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
-                Snackbar.make(toolbar, "Settings", Snackbar.LENGTH_LONG)
+                Snackbar.make(mToolbar, "Settings", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 break;
         }
@@ -154,11 +146,14 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
         //        appBar.setVisibility(View.VISIBLE);
 
-        if (toolbar.getVisibility() == View.INVISIBLE) {
-            toolbar.setVisibility(View.VISIBLE);
+        if (mToolbar.getVisibility() == View.INVISIBLE) {
+            mToolbar.setVisibility(View.VISIBLE);
         }
 
-        toolbar.animate().translationY(0).setInterpolator(new DecelerateInterpolator()).start();
+        mToolbar.animate()
+                .translationY(0)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
 
         int flags = 0;
 
@@ -184,7 +179,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     public void hideSystemUI() {
 
         //        appBar.setVisibility(View.GONE);
-        toolbar.animate().translationY(-toolbar.getBottom()).setInterpolator(
+        mToolbar.animate().translationY(-mToolbar.getBottom()).setInterpolator(
                 new AccelerateInterpolator()).start();
 
         int flags = 0;
@@ -225,8 +220,8 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     protected void onDestroy() {
         mMediaFiles.clear();
-        viewPager.clearOnPageChangeListeners();
-        viewPager.setAdapter(null);
+        mViewPager.clearOnPageChangeListeners();
+        mViewPager.setAdapter(null);
         mPagerAdapter = null;
         super.onDestroy();
     }
@@ -266,113 +261,6 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     }
 
-    public static class ImageFragment extends Fragment {
 
-        private boolean isOrientationUpdated = false;
-        private boolean isVisibleToUser = false;
-        private int width = -1;
-        private int height = -1;
-
-        public ImageFragment() {
-        }
-
-        public static ImageFragment newInstance(int position) {
-            ImageFragment fragment = new ImageFragment();
-            Bundle args = new Bundle();
-            args.putInt(POSITION, position);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public void setUserVisibleHint(boolean isVisibleToUser) {
-            super.setUserVisibleHint(isVisibleToUser);
-
-            this.isVisibleToUser = isVisibleToUser;
-
-            if (isVisibleToUser) {
-                if (!isOrientationUpdated) {
-                    updateOrientation();
-                }
-            } else {
-                isOrientationUpdated = false;
-            }
-        }
-
-        private void updateOrientation() {
-            if (getActivity() != null) {
-                ((ViewerActivity) getActivity()).updateOrientation(width, height);
-            }
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_viewer, container, false);
-
-            PhotoView image = (PhotoView) view.findViewById(R.id.image);
-            int position = getArguments().getInt(POSITION);
-
-            Glide.with(getContext()).load(mMediaFiles.get(position))
-                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                    .listener(new RequestListener<Media, GlideDrawable>() {
-                        @Override
-                        public boolean onException(Exception e, Media model,
-                                Target<GlideDrawable> target,
-                                boolean isFirstResource) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(GlideDrawable resource, Media model,
-                                Target<GlideDrawable> target, boolean isFromMemoryCache,
-                                boolean isFirstResource) {
-                            width = resource.getIntrinsicWidth();
-                            height = resource.getIntrinsicHeight();
-                            if (isVisibleToUser && !isOrientationUpdated) {
-                                updateOrientation();
-                            }
-                            return false;
-                        }
-                    })
-                    .fitCenter().into(image);
-
-            image.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
-                @Override
-                public void onViewTap(View view, float x, float y) {
-                    ViewerActivity out = (ViewerActivity) getActivity();
-                    if (!out.isSystemUIVisible()) {
-                        out.showSystemUI(true);
-                    } else {
-                        out.hideSystemUIDelayed(0);
-                    }
-                }
-            });
-
-            return view;
-        }
-    }
-
-    private class PagerAdapter extends FragmentStatePagerAdapter {
-
-        public PagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return ImageFragment.newInstance(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mMediaFiles.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mMediaFiles.get(position).getName();
-        }
-    }
 
 }

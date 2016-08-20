@@ -1,4 +1,4 @@
-package org.xdty.gallery.model.setting;
+package org.xdty.gallery.setting;
 
 import java.util.Set;
 
@@ -9,4 +9,7 @@ public interface Setting {
     Set<String> getServers();
 
     void addServer(String server);
+
+    String getLocalPath();
+
 }

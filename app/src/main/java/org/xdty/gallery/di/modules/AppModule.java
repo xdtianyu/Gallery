@@ -7,8 +7,8 @@ import com.google.gson.Gson;
 import org.xdty.gallery.application.Application;
 import org.xdty.gallery.data.MediaDataSource;
 import org.xdty.gallery.data.MediaRepository;
-import org.xdty.gallery.model.setting.Setting;
-import org.xdty.gallery.model.setting.SettingImpl;
+import org.xdty.gallery.setting.Setting;
+import org.xdty.gallery.setting.SettingImpl;
 
 import javax.inject.Singleton;
 

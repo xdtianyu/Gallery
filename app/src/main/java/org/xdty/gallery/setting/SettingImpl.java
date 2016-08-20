@@ -1,7 +1,8 @@
-package org.xdty.gallery.model.setting;
+package org.xdty.gallery.setting;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 
@@ -35,6 +36,11 @@ public class SettingImpl implements Setting {
         Set<String> servers = getServers();
         servers.add(server);
         mPref.edit().putStringSet("server_list", servers).apply();
+    }
+
+    @Override
+    public String getLocalPath() {
+        return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
     @NonNull

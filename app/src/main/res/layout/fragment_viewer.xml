@@ -2,7 +2,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".ViewerActivity$ImageFragment">
+                tools:context=".activity.ViewerActivity$ImageFragment">
 
     <uk.co.senab.photoview.PhotoView
         android:id="@+id/image"

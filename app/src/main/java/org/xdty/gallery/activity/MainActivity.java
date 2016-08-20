@@ -1,4 +1,4 @@
-package org.xdty.gallery;
+package org.xdty.gallery.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +19,7 @@ import android.widget.EditText;
 
 import com.bumptech.glide.Glide;
 
+import org.xdty.gallery.R;
 import org.xdty.gallery.application.Application;
 import org.xdty.gallery.contract.MainContact;
 import org.xdty.gallery.di.DaggerMainComponent;
