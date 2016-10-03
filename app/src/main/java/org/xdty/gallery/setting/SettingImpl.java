@@ -28,7 +28,7 @@ public class SettingImpl implements Setting {
 
     @Override
     public Set<String> getServers() {
-        return mPref.getStringSet("server_list", new HashSet<String>());
+        return new HashSet<>(mPref.getStringSet("server_list", new HashSet<String>()));
     }
 
     @Override
