@@ -30,12 +30,11 @@ public class MainPresenter implements MainContact.Presenter {
 
     @Inject
     MediaDataSource mMediaDataSource;
-
-    private MainContact.View mView;
-
     boolean isRoot = false;
-
+    private MainContact.View mView;
     private List<Media> mMediaFileList = new ArrayList<>();
+
+    private boolean isLoading = false;
 
     public MainPresenter(MainContact.View view) {
         Application.getAppComponent().inject(this);
@@ -87,8 +86,16 @@ public class MainPresenter implements MainContact.Presenter {
     }
 
     @Override
-    public void clickItem(int position, Media media) {
-        mView.onItemClicked(position, media);
+    public void clickItem(int position, Media media, int firstPosition) {
+        if (isLoading) {
+            return;
+        }
+
+        if (media.isImage()) {
+            mView.startViewer(position, media);
+        } else {
+            loadChild(firstPosition, media);
+        }
     }
 
     @Override
@@ -133,6 +140,9 @@ public class MainPresenter implements MainContact.Presenter {
     }
 
     private void loadDir(Media media) {
+        mView.setTitle(media.getName());
+        mView.showLoading(true);
+        isLoading = true;
         loadDir(media, false);
     }
 
@@ -147,6 +157,8 @@ public class MainPresenter implements MainContact.Presenter {
 
                 mView.setTitle(media.getName());
                 mView.scrollToPosition(media.getPosition());
+                mView.showLoading(false);
+                isLoading = false;
             }
         });
     }

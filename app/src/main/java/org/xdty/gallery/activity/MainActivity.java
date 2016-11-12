@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 
 import org.xdty.gallery.R;
 import org.xdty.gallery.application.Application;
@@ -33,7 +34,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class MainActivity extends AppCompatActivity implements MainContact.View {
+public class MainActivity extends AppCompatActivity implements MainContact.View,
+        GalleryAdapter.ItemClickListener {
 
     public final static String TAG = MainActivity.class.getSimpleName();
     public final static int REQUEST_POSITION = 1000;
@@ -41,13 +43,23 @@ public class MainActivity extends AppCompatActivity implements MainContact.View 
     @Inject
     MainContact.Presenter mMainPresenter;
 
+    @Inject
+    RequestManager mGlideRequest;
+
     private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
     private FloatingActionButton mFab;
-
     private GalleryAdapter mGalleryAdapter;
     private GridLayoutManager mGridLayoutManager;
+
+    private Runnable mRefreshDelayedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mSwipeRefreshLayout.setRefreshing(true);
+            mGalleryAdapter.clear();
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +76,18 @@ public class MainActivity extends AppCompatActivity implements MainContact.View 
         setupViews();
 
         mMainPresenter.start();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGlideRequest.resumeRequests();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mGlideRequest.pauseRequests();
     }
 
     private void setupViews() {
@@ -87,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements MainContact.View 
 
         mGridLayoutManager = new GridLayoutManager(this, 3);
         mRecyclerView.setLayoutManager(mGridLayoutManager);
-        mGalleryAdapter = new GalleryAdapter(mMainPresenter);
+        mGalleryAdapter = new GalleryAdapter();
+        mGalleryAdapter.setItemClickListener(this);
         mRecyclerView.setAdapter(mGalleryAdapter);
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -96,9 +121,9 @@ public class MainActivity extends AppCompatActivity implements MainContact.View 
                 super.onScrollStateChanged(recyclerView, newState);
 
                 if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
-                    Glide.with(recyclerView.getContext()).pauseRequests();
+                    mGlideRequest.pauseRequests();
                 } else {
-                    Glide.with(recyclerView.getContext()).resumeRequests();
+                    mGlideRequest.resumeRequests();
                 }
             }
 
@@ -141,6 +166,26 @@ public class MainActivity extends AppCompatActivity implements MainContact.View 
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
+    @Override
+    public void startViewer(int position, Media media) {
+        Glide.with(this).pauseRequests();
+        Intent intent = new Intent(this, ViewerActivity.class);
+        intent.putExtra("uri", media.getParent());
+        intent.putExtra("host", media.getHost());
+        intent.putExtra("position", position);
+        startActivityForResult(intent, REQUEST_POSITION);
+    }
+
+    @Override
+    public void showLoading(boolean isLoading) {
+        if (isLoading) {
+            mSwipeRefreshLayout.postDelayed(mRefreshDelayedRunnable, 200);
+        } else {
+            mSwipeRefreshLayout.removeCallbacks(mRefreshDelayedRunnable);
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
     void showAddServerDialog() {
         View layout = View.inflate(this, R.layout.dialog_add_server, null);
 
@@ -177,20 +222,6 @@ public class MainActivity extends AppCompatActivity implements MainContact.View 
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onItemClicked(int position, Media media) {
-        if (media.isImage()) {
-            Glide.with(this).pauseRequests();
-            Intent intent = new Intent(this, ViewerActivity.class);
-            intent.putExtra("uri", media.getParent());
-            intent.putExtra("host", media.getHost());
-            intent.putExtra("position", position);
-            startActivityForResult(intent, REQUEST_POSITION);
-        } else {
-            mMainPresenter.loadChild(mGridLayoutManager.findFirstVisibleItemPosition(), media);
-        }
     }
 
     @Override
@@ -235,5 +266,11 @@ public class MainActivity extends AppCompatActivity implements MainContact.View 
     @Override
     public void setPresenter(MainContact.Presenter presenter) {
 
+    }
+
+    @Override
+    public void onItemClick(int position, Media media) {
+        mMainPresenter.clickItem(position, media,
+                mGridLayoutManager.findFirstVisibleItemPosition());
     }
 }

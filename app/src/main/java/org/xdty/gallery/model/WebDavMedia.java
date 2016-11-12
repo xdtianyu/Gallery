@@ -12,7 +12,7 @@ import java.util.List;
 
 public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Comparable<WebDavMedia> {
 
-    private final static String[] SCHEME = new String[]{"dav", "davs"};
+    private final static String[] SCHEME = new String[] { "dav", "davs" };
 
     private WebDavMedia parent;
     private List<WebDavMedia> children = new ArrayList<>();
@@ -76,14 +76,16 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
         if (children.size() == 0) {
             try {
                 WebDavFile[] files = super.listFiles();
-                for (WebDavFile file : files) {
-                    WebDavMedia media = new WebDavMedia(file);
-                    media.setParent(this);
-                    children.add(media);
+                if (files != null) {
+                    for (WebDavFile file : files) {
+                        WebDavMedia media = new WebDavMedia(file);
+                        media.setParent(this);
+                        children.add(media);
 
-                    if (!hasImage) {
-                        if (media.isImage()) {
-                            hasImage = true;
+                        if (!hasImage) {
+                            if (media.isImage()) {
+                                hasImage = true;
+                            }
                         }
                     }
                 }

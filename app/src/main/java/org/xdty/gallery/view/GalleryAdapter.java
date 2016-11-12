@@ -1,6 +1,5 @@
 package org.xdty.gallery.view;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
@@ -8,29 +7,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.xdty.gallery.R;
-import org.xdty.gallery.contract.MainContact;
+import org.xdty.gallery.application.Application;
 import org.xdty.gallery.model.Media;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     public final static String TAG = GalleryAdapter.class.getSimpleName();
 
+    @Inject
+    RequestManager mGlideRequest;
+
     private static final int TYPE_MEDIA = 1000;
 
-    private List<Media> mMedias;
-    private MainContact.Presenter mPresenter;
+    private List<Media> mMedias = new ArrayList<>();;
+    private ItemClickListener mItemClickListener;
 
-    public GalleryAdapter(MainContact.Presenter presenter) {
-        mMedias = new ArrayList<>();
-        mPresenter = presenter;
+    public GalleryAdapter() {
+        Application.getAppComponent().inject(this);
     }
 
     @Override
@@ -54,32 +57,37 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
         return mMedias.size();
     }
 
+    public void clear() {
+        mMedias.clear();
+        notifyDataSetChanged();
+    }
+
     public void replaceData(List<Media> mediaList) {
         mMedias = mediaList;
         notifyDataSetChanged();
     }
 
-    private class MediaViewHolder extends RecyclerView.ViewHolder implements IViewHolder {
+    public void setItemClickListener(ItemClickListener itemClickListener) {
+        mItemClickListener = itemClickListener;
+    }
+
+    public interface ItemClickListener {
+        void onItemClick(int position, Media media);
+    }
+
+    private class MediaViewHolder extends RecyclerView.ViewHolder
+            implements IViewHolder, View.OnClickListener {
 
         SquareImageView thumbnail;
         TextView name;
         int position;
         Media mediaFile;
 
-        private Context mContext;
-
         MediaViewHolder(View view) {
             super(view);
 
-            mContext = view.getContext();
-
             thumbnail = (SquareImageView) view.findViewById(R.id.thumbnail);
-            thumbnail.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mPresenter.clickItem(position, mediaFile);
-                }
-            });
+            thumbnail.setOnClickListener(this);
 
             name = (TextView) view.findViewById(R.id.name);
         }
@@ -92,14 +100,14 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
             name.setText(mediaFile.getName());
 
             if (mediaFile.isImage()) {
-                Glide.with(mContext).load(mediaFile)
+                mGlideRequest.load(mediaFile)
                         .asBitmap()
                         .format(DecodeFormat.PREFER_RGB_565)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         .fitCenter().centerCrop().into(thumbnail);
                 name.setVisibility(View.GONE);
             } else {
-                Glide.with(mContext).load(mediaFile)
+                mGlideRequest.load(mediaFile)
                         .asBitmap()
                         .format(DecodeFormat.PREFER_RGB_565)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
@@ -108,6 +116,13 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
                         .dontAnimate()
                         .fitCenter().centerCrop().into(thumbnail);
                 name.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (mItemClickListener != null) {
+                mItemClickListener.onItemClick(position, mediaFile);
             }
         }
     }

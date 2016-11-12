@@ -10,8 +10,8 @@ public interface MainContact {
         void setTitle(String title);
         void scrollToPosition(int position);
         void replaceData(List<Media> mediaList);
-
-        void onItemClicked(int position, Media media);
+        void startViewer(int position, Media media);
+        void showLoading(boolean isLoading);
     }
 
     interface Presenter extends BasePresenter {
@@ -22,7 +22,7 @@ public interface MainContact {
 
         void addServer(String uri, String user, String pass);
 
-        void clickItem(int position, Media mediaFile);
+        void clickItem(int position, Media mediaFile, int firstPosition);
 
         void loadChild(int position, Media media);
 

@@ -5,6 +5,7 @@ import org.xdty.gallery.data.MediaRepository;
 import org.xdty.gallery.di.modules.AppModule;
 import org.xdty.gallery.presenter.MainPresenter;
 import org.xdty.gallery.presenter.ViewerPresenter;
+import org.xdty.gallery.view.GalleryAdapter;
 
 import javax.inject.Singleton;
 
@@ -20,4 +21,6 @@ public interface AppComponent {
     void inject(ViewerPresenter viewerPresenter);
 
     void inject(MediaRepository mediaRepository);
+
+    void inject(GalleryAdapter galleryAdapter);
 }
