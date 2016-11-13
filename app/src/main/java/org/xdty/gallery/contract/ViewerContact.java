@@ -21,12 +21,14 @@ public interface ViewerContact {
 
         void replaceData(List<Media> medias, int position);
 
+        void load(Media media);
+
         void setTitle(String name);
     }
 
     interface Presenter extends BasePresenter {
 
-        void loadData(String uri, String host, int position);
+        void loadData(String uri, String parent, String host, int position);
 
         void pageSelected(int position);
 

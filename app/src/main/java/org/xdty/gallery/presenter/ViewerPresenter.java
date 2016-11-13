@@ -35,9 +35,12 @@ public class ViewerPresenter implements ViewerContact.Presenter {
     }
 
     @Override
-    public void loadData(String uri, String host, final int position) {
-        Media media = Media.Builder.getCurrent();
-        mDataSource.loadMediaList(media).subscribe(new Action1<List<Media>>() {
+    public void loadData(String uri, String parentUri, String host, final int position) {
+        Media media = Media.Builder.uri(uri);
+        mView.load(media);
+
+        Media parent = Media.Builder.uri(parentUri);
+        mDataSource.loadMediaList(parent).subscribe(new Action1<List<Media>>() {
             @Override
             public void call(List<Media> medias) {
                 mMedias.clear();

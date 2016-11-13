@@ -3,7 +3,6 @@ package org.xdty.gallery.view;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.util.Log;
 
 import org.xdty.gallery.fragment.ImageFragment;
 import org.xdty.gallery.model.Media;
@@ -22,7 +21,6 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        Log.e("xxx", "getItem: " + position + " -> " + mMedias.get(position).getUri());
         return ImageFragment.newInstance(mMedias.get(position).getUri());
     }
 
@@ -39,11 +37,13 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
     public void load(Media media) {
         mMedias.clear();
         mMedias.add(media);
+        notifyDataSetChanged();
     }
 
     public void replaceData(List<Media> medias) {
         mMedias.clear();
         mMedias.addAll(medias);
+        notifyDataSetChanged();
     }
 
     public void clear() {

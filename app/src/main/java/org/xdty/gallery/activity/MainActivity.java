@@ -172,7 +172,8 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
     public void startViewer(int position, Media media) {
         Glide.with(this).pauseRequests();
         Intent intent = new Intent(this, ViewerActivity.class);
-        intent.putExtra(Constants.URI, media.getParent());
+        intent.putExtra(Constants.URI, media.getUri());
+        intent.putExtra(Constants.PARENT, media.getParent());
         intent.putExtra(Constants.HOST, media.getHost());
         intent.putExtra(Constants.POSITION, position);
 
@@ -184,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
                 thumbnail.getHeight());
 
         startActivityForResult(intent, REQUEST_POSITION, options.toBundle());
-        Log.e(TAG, "start: " + position + " -> " + System.currentTimeMillis());
     }
 
     @Override

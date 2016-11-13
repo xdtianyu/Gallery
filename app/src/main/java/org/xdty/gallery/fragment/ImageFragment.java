@@ -2,7 +2,6 @@ package org.xdty.gallery.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 import static org.xdty.gallery.utils.Constants.URI;
-import static org.xdty.gallery.view.GalleryAdapter.TAG;
 
 public class ImageFragment extends Fragment {
 
@@ -89,7 +87,6 @@ public class ImageFragment extends Fragment {
                         if (isVisibleToUser && !isOrientationUpdated) {
                             updateOrientation();
                         }
-                        Log.e(TAG, "ready: " + uri + " -> " + System.currentTimeMillis());
                         return false;
                     }
                 })

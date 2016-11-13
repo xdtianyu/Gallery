@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
@@ -25,15 +26,12 @@ import org.xdty.gallery.di.DaggerViewerComponent;
 import org.xdty.gallery.di.modules.AppModule;
 import org.xdty.gallery.di.modules.ViewerModule;
 import org.xdty.gallery.model.Media;
+import org.xdty.gallery.utils.Constants;
 import org.xdty.gallery.view.PagerAdapter;
 
 import java.util.List;
 
 import javax.inject.Inject;
-
-import static org.xdty.gallery.utils.Constants.HOST;
-import static org.xdty.gallery.utils.Constants.POSITION;
-import static org.xdty.gallery.utils.Constants.URI;
 
 public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener,
         ViewerContact.View {
@@ -48,6 +46,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     private Toolbar mToolbar;
     private ViewPager mViewPager;
     private PagerAdapter mPagerAdapter;
+    private Handler mMainHandler = new Handler(Looper.getMainLooper());
     private Handler mHandler = new Handler();
     private Runnable hideSystemUIRunnable;
 
@@ -67,9 +66,10 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
         setSupportActionBar(mToolbar);
 
-        int position = getIntent().getIntExtra(POSITION, 0);
-        String uri = getIntent().getStringExtra(URI);
-        String host = getIntent().getStringExtra(HOST);
+        int position = getIntent().getIntExtra(Constants.POSITION, 0);
+        String uri = getIntent().getStringExtra(Constants.URI);
+        String parent = getIntent().getStringExtra(Constants.PARENT);
+        String host = getIntent().getStringExtra(Constants.HOST);
 
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mPagerAdapter);
@@ -77,7 +77,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
         hideSystemUIDelayed(0);
 
-        mPresenter.loadData(uri, host, position);
+        mPresenter.loadData(uri, parent, host, position);
     }
 
     @Override
@@ -88,16 +88,18 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     public void replaceData(final List<Media> medias, final int position) {
-        mPagerAdapter.load(medias.get(position));
-        mPagerAdapter.notifyDataSetChanged();
-        mViewPager.postDelayed(new Runnable() {
+        mMainHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 mPagerAdapter.replaceData(medias);
-                mPagerAdapter.notifyDataSetChanged();
                 mViewPager.setCurrentItem(position, false);
             }
         }, 300);
+    }
+
+    @Override
+    public void load(Media media) {
+        mPagerAdapter.load(media);
     }
 
     @Override
@@ -218,7 +220,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public void onBackPressed() {
         Intent intent = new Intent();
-        intent.putExtra(POSITION, mPresenter.getPosition());
+        intent.putExtra(Constants.POSITION, mPresenter.getPosition());
         setResult(RESULT_OK, intent);
         super.onBackPressed();
     }
@@ -236,6 +238,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         mPagerAdapter = null;
         mPresenter.clear();
         mPresenter = null;
+        mMainHandler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
 
@@ -243,6 +246,10 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     public void updateOrientation(int width, int height) {
 
         if (width == height) {
+            return;
+        }
+
+        if (mPagerAdapter.getCount() == 1) {
             return;
         }
 
