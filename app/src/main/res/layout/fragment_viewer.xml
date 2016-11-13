@@ -1,11 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".activity.ViewerActivity$ImageFragment">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <uk.co.senab.photoview.PhotoView
         android:id="@+id/image"
+        style="@style/item_transition"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/app_name"/>

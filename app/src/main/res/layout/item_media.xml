@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <org.xdty.gallery.view.SquareImageView
         android:id="@+id/thumbnail"
+        style="@style/item_transition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/image_item_padding"
-        android:contentDescription="@string/thumbnail"/>
+        android:contentDescription="@string/thumbnail"
+        android:padding="@dimen/image_item_padding"/>
+
     <TextView
         android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:maxLines="1"
         android:paddingLeft="@dimen/text_horizontal_padding"
-        android:paddingRight="@dimen/text_horizontal_padding"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:paddingRight="@dimen/text_horizontal_padding"/>
 </LinearLayout>

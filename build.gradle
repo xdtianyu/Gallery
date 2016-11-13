@@ -26,16 +26,18 @@ cobertura.coverageFormats = ['html', 'xml']
 allprojects {
     repositories {
         jcenter()
+
+        maven { url "https://jitpack.io" }
     }
 }
 
 ext {
-    compileSdkVersion = 24
-    buildToolsVersion = "24.0.1"
+    compileSdkVersion = 25
+    buildToolsVersion = "25.0.0"
     minSdkVersion = 16
-    targetSdkVersion = 24
+    targetSdkVersion = 25
 
-    supportVersion = "24.2.0"
+    supportVersion = "25.0.0"
 
     aaVersion = "3.3.2"
 }

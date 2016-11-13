@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,7 @@ import org.xdty.gallery.di.DaggerMainComponent;
 import org.xdty.gallery.di.modules.AppModule;
 import org.xdty.gallery.di.modules.MainModule;
 import org.xdty.gallery.model.Media;
+import org.xdty.gallery.utils.Constants;
 import org.xdty.gallery.utils.Utils;
 import org.xdty.gallery.view.GalleryAdapter;
 
@@ -170,10 +172,18 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
     public void startViewer(int position, Media media) {
         Glide.with(this).pauseRequests();
         Intent intent = new Intent(this, ViewerActivity.class);
-        intent.putExtra("uri", media.getParent());
-        intent.putExtra("host", media.getHost());
-        intent.putExtra("position", position);
-        startActivityForResult(intent, REQUEST_POSITION);
+        intent.putExtra(Constants.URI, media.getParent());
+        intent.putExtra(Constants.HOST, media.getHost());
+        intent.putExtra(Constants.POSITION, position);
+
+        View thumbnail = mRecyclerView.findViewHolderForAdapterPosition(
+                position).itemView.findViewById(R.id.thumbnail);
+
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeScaleUpAnimation(
+                thumbnail, (int) thumbnail.getX(), (int) thumbnail.getY(), thumbnail.getWidth(),
+                thumbnail.getHeight());
+
+        startActivityForResult(intent, REQUEST_POSITION, options.toBundle());
     }
 
     @Override

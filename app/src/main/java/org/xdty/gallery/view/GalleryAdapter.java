@@ -104,6 +104,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
                         .asBitmap()
                         .format(DecodeFormat.PREFER_RGB_565)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        .placeholder(R.color.gray_overlay)
                         .fitCenter().centerCrop().into(thumbnail);
                 name.setVisibility(View.GONE);
             } else {

@@ -44,6 +44,7 @@ public class ViewerPresenter implements ViewerContact.Presenter {
                 mMedias.addAll(medias);
                 mView.replaceData(mMedias);
                 mView.setCurrentItem(position);
+                mView.setTitle(mMedias.get(position).getName());
             }
         });
     }

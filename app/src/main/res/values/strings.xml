@@ -37,4 +37,5 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="add_server_help">Help</string>
+    <string name="transition_thumbnail" translatable="false">transition:THUMBNAIL</string>
 </resources>
