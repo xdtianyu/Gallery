@@ -184,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
                 thumbnail.getHeight());
 
         startActivityForResult(intent, REQUEST_POSITION, options.toBundle());
+        Log.e(TAG, "start: " + position + " -> " + System.currentTimeMillis());
     }
 
     @Override

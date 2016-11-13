@@ -19,9 +19,7 @@ public interface ViewerContact {
 
         void hideSystemUI();
 
-        void replaceData(List<Media> medias);
-
-        void setCurrentItem(int position);
+        void replaceData(List<Media> medias, int position);
 
         void setTitle(String name);
     }

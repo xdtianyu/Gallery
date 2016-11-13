@@ -87,13 +87,17 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     @Override
-    public void replaceData(List<Media> medias) {
-        mPagerAdapter.replaceData(medias);
-    }
-
-    @Override
-    public void setCurrentItem(int position) {
-        mViewPager.setCurrentItem(position, false);
+    public void replaceData(final List<Media> medias, final int position) {
+        mPagerAdapter.load(medias.get(position));
+        mPagerAdapter.notifyDataSetChanged();
+        mViewPager.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mPagerAdapter.replaceData(medias);
+                mPagerAdapter.notifyDataSetChanged();
+                mViewPager.setCurrentItem(position, false);
+            }
+        }, 300);
     }
 
     @Override
