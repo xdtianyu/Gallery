@@ -14,7 +14,11 @@ import com.bumptech.glide.request.target.Target;
 
 import org.xdty.gallery.R;
 import org.xdty.gallery.activity.ViewerActivity;
+import org.xdty.gallery.application.Application;
+import org.xdty.gallery.data.MediaDataSource;
 import org.xdty.gallery.model.Media;
+
+import javax.inject.Inject;
 
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -23,12 +27,15 @@ import static org.xdty.gallery.utils.Constants.URI;
 
 public class ImageFragment extends Fragment {
 
+    @Inject
+    MediaDataSource mDataSource;
     private boolean isOrientationUpdated = false;
     private boolean isVisibleToUser = false;
     private int width = -1;
     private int height = -1;
 
     public ImageFragment() {
+        Application.getAppComponent().inject(this);
     }
 
     public static ImageFragment newInstance(String uri) {
@@ -68,7 +75,7 @@ public class ImageFragment extends Fragment {
         PhotoView image = (PhotoView) view.findViewById(R.id.image);
         final String uri = getArguments().getString(URI);
 
-        Glide.with(getContext()).load(Media.Builder.uri(uri))
+        Glide.with(getContext()).load(mDataSource.getMedia(uri))
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .listener(new RequestListener<Media, GlideDrawable>() {
                     @Override

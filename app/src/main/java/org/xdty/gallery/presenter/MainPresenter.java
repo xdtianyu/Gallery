@@ -44,16 +44,16 @@ public class MainPresenter implements MainContact.Presenter {
     @Override
     public void start() {
         try {
-            Media.Builder.register(new LocalMedia());
-            Media.Builder.register(new SambaMedia());
-            Media.Builder.register(new WebDavMedia());
+            mMediaDataSource.register(new LocalMedia());
+            mMediaDataSource.register(new SambaMedia());
+            mMediaDataSource.register(new WebDavMedia());
 
-            Media.Builder.addRoot(mSetting.getLocalPath(), null, null);
+            mMediaDataSource.addRoot(mSetting.getLocalPath(), null, null);
 
             Set<String> servers = mSetting.getServers();
             for (String server : servers) {
                 ServerInfo info = mGson.fromJson(server, ServerInfo.class);
-                Media.Builder.addRoot(info.getUri(), info.getUser(), info.getPass());
+                mMediaDataSource.addRoot(info.getUri(), info.getUser(), info.getPass());
             }
 
         } catch (Exception e) {
@@ -72,7 +72,7 @@ public class MainPresenter implements MainContact.Presenter {
         if (isRoot) {
             loadRootDir();
         } else {
-            loadDir(Media.Builder.getCurrent(), true);
+            loadDir(mMediaDataSource.getCurrent(), true);
         }
     }
 
@@ -82,7 +82,7 @@ public class MainPresenter implements MainContact.Presenter {
 
         mSetting.addServer(server);
 
-        Media.Builder.addRoot(uri, user, pass);
+        mMediaDataSource.addRoot(uri, user, pass);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class MainPresenter implements MainContact.Presenter {
             return false;
         }
 
-        Media media = Media.Builder.getCurrent();
+        Media media = mMediaDataSource.getCurrent();
         if (media == null || media.parent() == null) {
             loadRootDir();
         } else {
@@ -129,9 +129,9 @@ public class MainPresenter implements MainContact.Presenter {
     private void loadRootDir() {
 
         mMediaFileList.clear();
-        mMediaFileList.addAll(Media.Builder.roots());
+        mMediaFileList.addAll(mMediaDataSource.roots());
 
-        Media.Builder.setCurrent(null);
+        mMediaDataSource.setCurrent(null);
 
         mView.replaceData(mMediaFileList);
 
@@ -153,7 +153,7 @@ public class MainPresenter implements MainContact.Presenter {
                 mView.replaceData(medias);
 
                 isRoot = false;
-                Media.Builder.setCurrent(media);
+                mMediaDataSource.setCurrent(media);
 
                 mView.setTitle(media.getName());
                 mView.scrollToPosition(media.getPosition());

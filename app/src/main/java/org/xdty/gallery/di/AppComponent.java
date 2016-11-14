@@ -1,8 +1,8 @@
 package org.xdty.gallery.di;
 
 import org.xdty.gallery.application.Application;
-import org.xdty.gallery.data.MediaRepository;
 import org.xdty.gallery.di.modules.AppModule;
+import org.xdty.gallery.fragment.ImageFragment;
 import org.xdty.gallery.presenter.MainPresenter;
 import org.xdty.gallery.presenter.ViewerPresenter;
 import org.xdty.gallery.view.GalleryAdapter;
@@ -20,7 +20,7 @@ public interface AppComponent {
 
     void inject(ViewerPresenter viewerPresenter);
 
-    void inject(MediaRepository mediaRepository);
-
     void inject(GalleryAdapter galleryAdapter);
+
+    void inject(ImageFragment imageFragment);
 }

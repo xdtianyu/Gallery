@@ -98,6 +98,11 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
+    public int childrenSize() {
+        return children.size();
+    }
+
+    @Override
     public String getUri() {
         return super.getPath();
     }

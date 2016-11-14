@@ -126,6 +126,11 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
     }
 
     @Override
+    public int childrenSize() {
+        return children.size();
+    }
+
+    @Override
     public String[] scheme() {
         return SCHEME;
     }
