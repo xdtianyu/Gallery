@@ -1,14 +1,14 @@
 package org.xdty.gallery.data;
 
+import android.support.v4.util.LruCache;
+
 import org.xdty.gallery.model.Media;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class MediaCache {
 
-    private Map<String, Media> mCache = new HashMap<>();
+    private LruCache<String, Media> mCache = new LruCache<>(100000);
 
     static MediaCache getInstance() {
         return SingletonHelper.INSTANCE;
@@ -20,10 +20,6 @@ public final class MediaCache {
 
     Media get(String key) {
         return mCache.get(key);
-    }
-
-    boolean contains(String key) {
-        return mCache.containsKey(key);
     }
 
     void put(List<Media> medias) {

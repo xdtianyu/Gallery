@@ -88,8 +88,9 @@ public class MediaRepository implements MediaDataSource {
 
     @Override
     public Media getMedia(String uri) {
-        if (mMediaCache.contains(uri)) {
-            return mMediaCache.get(uri);
+        Media media = mMediaCache.get(uri);
+        if (media != null) {
+            return media;
         }
         return fromUri(uri);
     }
