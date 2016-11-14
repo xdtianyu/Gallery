@@ -126,6 +126,12 @@ public class MainPresenter implements MainContact.Presenter {
         return true;
     }
 
+    @Override
+    public void clear() {
+        mMediaDataSource.clearCache();
+        mMediaFileList.clear();
+    }
+
     private void loadRootDir() {
 
         mMediaFileList.clear();

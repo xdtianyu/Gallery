@@ -257,6 +257,12 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMainPresenter.clear();
+    }
+
+    @Override
     public void onBackPressed() {
 
         mRecyclerView.computeVerticalScrollOffset();

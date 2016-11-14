@@ -27,5 +27,7 @@ public interface MainContact {
         void loadChild(int position, Media media);
 
         boolean loadParent(int firstVisibleItemPosition);
+
+        void clear();
     }
 }

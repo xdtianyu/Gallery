@@ -26,18 +26,13 @@ public class MediaLoader implements StreamModelLoader<Media> {
     @Override
     public DataFetcher<InputStream> getResourceFetcher(Media model, int width, int height) {
 
-        GlideUrl result = null;
-        if (modelCache != null) {
-            result = modelCache.get(Uri.parse(model.getUri()), width, height);
-        }
+        GlideUrl result = modelCache.get(Uri.parse(model.getUri()), width, height);
 
         if (result == null) {
 
             result = new GlideUrl(model.getUri());
 
-            if (modelCache != null) {
-                modelCache.put(Uri.parse(model.getUri()), width, height, result);
-            }
+            modelCache.put(Uri.parse(model.getUri()), width, height, result);
         }
         return new MediaDataFetcher(context, model);
     }

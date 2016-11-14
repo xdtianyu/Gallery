@@ -155,4 +155,12 @@ public class MediaRepository implements MediaDataSource {
             }
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
+
+    @Override
+    public void clearCache() {
+        mMediaCache.clear();
+        mCurrent = null;
+        mRoots.clear();
+        mSupportMedias.clear();
+    }
 }

@@ -28,6 +28,10 @@ public final class MediaCache {
         }
     }
 
+    public void clear() {
+        mCache.evictAll();
+    }
+
     private static class SingletonHelper {
         private final static MediaCache INSTANCE = new MediaCache();
     }
