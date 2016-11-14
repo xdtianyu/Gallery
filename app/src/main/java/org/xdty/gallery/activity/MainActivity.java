@@ -260,6 +260,8 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
     protected void onDestroy() {
         super.onDestroy();
         mMainPresenter.clear();
+        mGlideRequest.onLowMemory();
+        System.gc();
     }
 
     @Override
