@@ -29,7 +29,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     private static final int TYPE_MEDIA = 1000;
 
-    private List<Media> mMedias = new ArrayList<>();;
+    private List<Media> mMedias = new ArrayList<>();
     private ItemClickListener mItemClickListener;
 
     public GalleryAdapter() {

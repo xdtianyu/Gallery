@@ -20,7 +20,7 @@ public class GlideSetup implements GlideModule {
         //builder.setBitmapPool(new LruBitmapPool(32 * 1024 * 1024));
         builder.setDecodeFormat(DecodeFormat.PREFER_ARGB_8888);
         builder.setDiskCache(new InternalCacheDiskCacheFactory(context, 2147483647));
-        builder.setResizeService(new FifoPriorityThreadPoolExecutor(1));
+        builder.setResizeService(new FifoPriorityThreadPoolExecutor(2));
     }
 
     @Override
