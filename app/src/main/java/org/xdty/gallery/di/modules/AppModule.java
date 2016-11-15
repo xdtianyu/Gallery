@@ -2,10 +2,6 @@ package org.xdty.gallery.di.modules;
 
 import android.content.Context;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
-import com.bumptech.glide.load.model.GlideUrl;
 import com.google.gson.Gson;
 
 import org.xdty.gallery.application.Application;
@@ -15,7 +11,6 @@ import org.xdty.gallery.setting.Setting;
 import org.xdty.gallery.setting.SettingImpl;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.inject.Singleton;
 
@@ -94,14 +89,6 @@ public class AppModule {
     @Provides
     public OkHttpClient provideOkHttpClient() {
         return mOkHttpClient;
-    }
-
-    @Singleton
-    @Provides
-    public RequestManager provideGlide() {
-        OkHttpUrlLoader.Factory factory = new OkHttpUrlLoader.Factory(mOkHttpClient);
-        Glide.get(mApplication).register(GlideUrl.class, InputStream.class, factory);
-        return Glide.with(mApplication);
     }
 
 }

@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
 
         mGridLayoutManager = new GridLayoutManager(this, 3);
         mRecyclerView.setLayoutManager(mGridLayoutManager);
-        mGalleryAdapter = new GalleryAdapter();
+        mGalleryAdapter = new GalleryAdapter(this);
         mGalleryAdapter.setItemClickListener(this);
         mRecyclerView.setAdapter(mGalleryAdapter);
 

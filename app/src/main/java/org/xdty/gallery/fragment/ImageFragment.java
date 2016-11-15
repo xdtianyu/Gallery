@@ -1,14 +1,16 @@
 package org.xdty.gallery.fragment;
 
+import android.graphics.drawable.Animatable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
@@ -16,6 +18,9 @@ import org.xdty.gallery.R;
 import org.xdty.gallery.activity.ViewerActivity;
 import org.xdty.gallery.application.Application;
 import org.xdty.gallery.data.MediaDataSource;
+import org.xdty.gallery.di.DaggerViewerComponent;
+import org.xdty.gallery.di.modules.AppModule;
+import org.xdty.gallery.di.modules.ViewerModule;
 import org.xdty.gallery.model.Media;
 
 import javax.inject.Inject;
@@ -29,13 +34,15 @@ public class ImageFragment extends Fragment {
 
     @Inject
     MediaDataSource mDataSource;
+    @Inject
+    RequestManager mRequestManager;
     private boolean isOrientationUpdated = false;
     private boolean isVisibleToUser = false;
     private int width = -1;
     private int height = -1;
+    private PhotoView image;
 
     public ImageFragment() {
-        Application.getAppComponent().inject(this);
     }
 
     public static ImageFragment newInstance(String uri) {
@@ -59,6 +66,17 @@ public class ImageFragment extends Fragment {
         } else {
             isOrientationUpdated = false;
         }
+
+        if (image != null) {
+            if (image.getDrawable() instanceof Animatable) {
+                Animatable animatable = (Animatable) image.getDrawable();
+                if (isVisibleToUser) {
+                    animatable.start();
+                } else {
+                    animatable.stop();
+                }
+            }
+        }
     }
 
     private void updateOrientation() {
@@ -70,12 +88,18 @@ public class ImageFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+
+        DaggerViewerComponent.builder()
+                .appModule(new AppModule((Application) getActivity().getApplication()))
+                .viewerModule(new ViewerModule((ViewerActivity) getActivity()))
+                .build().inject(this);
+
         View view = inflater.inflate(R.layout.fragment_viewer, container, false);
 
-        PhotoView image = (PhotoView) view.findViewById(R.id.image);
-        final String uri = getArguments().getString(URI);
+        image = (PhotoView) view.findViewById(R.id.image);
+        String uri = getArguments().getString(URI);
 
-        Glide.with(getContext()).load(mDataSource.getMedia(uri))
+        mRequestManager.load(mDataSource.getMedia(uri))
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .listener(new RequestListener<Media, GlideDrawable>() {
                     @Override
@@ -86,11 +110,23 @@ public class ImageFragment extends Fragment {
                     }
 
                     @Override
-                    public boolean onResourceReady(GlideDrawable resource, Media model,
+                    public boolean onResourceReady(final GlideDrawable resource, Media model,
                             Target<GlideDrawable> target, boolean isFromMemoryCache,
                             boolean isFirstResource) {
                         width = resource.getIntrinsicWidth();
                         height = resource.getIntrinsicHeight();
+
+                        if (resource instanceof GifDrawable) {
+                            image.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!isVisibleToUser) {
+                                        resource.stop();
+                                    }
+                                }
+                            }, 100);
+                        }
+
                         if (isVisibleToUser && !isOrientationUpdated) {
                             updateOrientation();
                         }

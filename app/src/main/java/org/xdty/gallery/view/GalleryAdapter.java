@@ -1,5 +1,6 @@
 package org.xdty.gallery.view;
 
+import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
@@ -7,33 +8,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.xdty.gallery.R;
-import org.xdty.gallery.application.Application;
 import org.xdty.gallery.model.Media;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     public final static String TAG = GalleryAdapter.class.getSimpleName();
-
-    @Inject
-    RequestManager mGlideRequest;
 
     private static final int TYPE_MEDIA = 1000;
 
     private List<Media> mMedias = new ArrayList<>();
     private ItemClickListener mItemClickListener;
 
-    public GalleryAdapter() {
-        Application.getAppComponent().inject(this);
+    private RequestManager mRequestManager;
+
+    public GalleryAdapter(Activity activity) {
+        mRequestManager = Glide.with(activity);
     }
 
     @Override
@@ -100,7 +98,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
             name.setText(mediaFile.getName());
 
             if (mediaFile.isImage()) {
-                mGlideRequest.load(mediaFile)
+                mRequestManager.load(mediaFile)
                         .asBitmap()
                         .format(DecodeFormat.PREFER_RGB_565)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
@@ -108,7 +106,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
                         .fitCenter().centerCrop().into(thumbnail);
                 name.setVisibility(View.GONE);
             } else {
-                mGlideRequest.load(mediaFile)
+                mRequestManager.load(mediaFile)
                         .asBitmap()
                         .format(DecodeFormat.PREFER_RGB_565)
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
