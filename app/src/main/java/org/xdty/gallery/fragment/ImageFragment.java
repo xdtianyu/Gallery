@@ -7,10 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
@@ -23,8 +23,11 @@ import org.xdty.gallery.di.modules.AppModule;
 import org.xdty.gallery.di.modules.ViewerModule;
 import org.xdty.gallery.model.Media;
 
+import java.io.InputStream;
+
 import javax.inject.Inject;
 
+import pl.droidsonroids.gif.GifDrawable;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -36,6 +39,10 @@ public class ImageFragment extends Fragment {
     MediaDataSource mDataSource;
     @Inject
     RequestManager mRequestManager;
+
+    @Inject
+    GenericRequestBuilder<Media, InputStream, byte[], pl.droidsonroids.gif.GifDrawable> gifGlide;
+
     private boolean isOrientationUpdated = false;
     private boolean isVisibleToUser = false;
     private int width = -1;
@@ -99,6 +106,54 @@ public class ImageFragment extends Fragment {
         image = (PhotoView) view.findViewById(R.id.image);
         String uri = getArguments().getString(URI);
 
+        if (uri != null && uri.toLowerCase().endsWith("gif")) {
+            loadGif(uri);
+        } else {
+            loadImage(uri);
+
+        }
+
+        image.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+            @Override
+            public void onViewTap(View view, float x, float y) {
+                ViewerActivity out = (ViewerActivity) getActivity();
+                if (!out.isSystemUIVisible()) {
+                    out.showSystemUI(true);
+                } else {
+                    out.hideSystemUIDelayed(0);
+                }
+            }
+        });
+
+        return view;
+    }
+
+    private void loadGif(String uri) {
+        gifGlide.load(mDataSource.getMedia(uri))
+                .listener(new RequestListener<Media, GifDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, Media model,
+                            Target<GifDrawable> target,
+                            boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(final GifDrawable resource, Media model,
+                            Target<GifDrawable> target, boolean isFromMemoryCache,
+                            boolean isFirstResource) {
+                        width = resource.getIntrinsicWidth();
+                        height = resource.getIntrinsicHeight();
+
+                        if (isVisibleToUser && !isOrientationUpdated) {
+                            updateOrientation();
+                        }
+                        return false;
+                    }
+                }).into(image);
+    }
+
+    private void loadImage(String uri) {
         mRequestManager.load(mDataSource.getMedia(uri))
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .listener(new RequestListener<Media, GlideDrawable>() {
@@ -116,37 +171,13 @@ public class ImageFragment extends Fragment {
                         width = resource.getIntrinsicWidth();
                         height = resource.getIntrinsicHeight();
 
-                        if (resource instanceof GifDrawable) {
-                            image.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (!isVisibleToUser) {
-                                        resource.stop();
-                                    }
-                                }
-                            }, 100);
-                        }
-
                         if (isVisibleToUser && !isOrientationUpdated) {
                             updateOrientation();
                         }
                         return false;
                     }
                 })
-                .fitCenter().into(image);
-
-        image.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
-            @Override
-            public void onViewTap(View view, float x, float y) {
-                ViewerActivity out = (ViewerActivity) getActivity();
-                if (!out.isSystemUIVisible()) {
-                    out.showSystemUI(true);
-                } else {
-                    out.hideSystemUIDelayed(0);
-                }
-            }
-        });
-
-        return view;
+                .fitCenter()
+                .into(image);
     }
 }
