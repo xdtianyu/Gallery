@@ -39,6 +39,8 @@ public class ViewerPresenter implements ViewerContact.Presenter {
         Media media = mDataSource.getMedia(uri);
         mView.load(media);
 
+        mSelectedPosition = position;
+
         Media parent = mDataSource.getMedia(parentUri);
         mDataSource.loadMediaList(parent).subscribe(new Action1<List<Media>>() {
             @Override

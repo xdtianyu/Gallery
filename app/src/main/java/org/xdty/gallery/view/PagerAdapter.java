@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import org.xdty.gallery.fragment.GifImageFragment;
 import org.xdty.gallery.fragment.ImageFragment;
 import org.xdty.gallery.model.Media;
 
@@ -21,7 +22,12 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        return ImageFragment.newInstance(mMedias.get(position).getUri());
+        String uri = mMedias.get(position).getUri();
+        if (uri.toLowerCase().endsWith("gif")) {
+            return GifImageFragment.newInstance(uri);
+        } else {
+            return ImageFragment.newInstance(uri);
+        }
     }
 
     @Override
