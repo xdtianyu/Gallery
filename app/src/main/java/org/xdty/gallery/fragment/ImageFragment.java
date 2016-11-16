@@ -3,6 +3,8 @@ package org.xdty.gallery.fragment;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,7 +52,25 @@ public class ImageFragment extends Fragment {
     private int height = -1;
     private PhotoView image;
 
+    private Handler mHandler;
+
+    private Runnable mUpdateGifRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (image != null && image.getDrawable() instanceof Animatable) {
+                Animatable animatable = (Animatable) image.getDrawable();
+                if (isVisibleToUser) {
+                    animatable.start();
+                } else {
+                    animatable.stop();
+                }
+            }
+
+        }
+    };
+
     public ImageFragment() {
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     public static ImageFragment newInstance(String uri) {
@@ -74,23 +94,21 @@ public class ImageFragment extends Fragment {
         } else {
             isOrientationUpdated = false;
         }
+        mHandler.removeCallbacks(mUpdateGifRunnable);
+        mHandler.postDelayed(mUpdateGifRunnable, 10);
 
-        if (image != null) {
-            if (image.getDrawable() instanceof Animatable) {
-                Animatable animatable = (Animatable) image.getDrawable();
-                if (isVisibleToUser) {
-                    animatable.start();
-                } else {
-                    animatable.stop();
-                }
-            }
-        }
     }
 
     private void updateOrientation() {
         if (getActivity() != null) {
             ((ViewerActivity) getActivity()).updateOrientation(width, height);
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mHandler.removeCallbacks(mUpdateGifRunnable);
     }
 
     @Override
@@ -143,7 +161,7 @@ public class ImageFragment extends Fragment {
         }
 
         @Override
-        public boolean onResourceReady(V resource, T model, Target<V> target,
+        public boolean onResourceReady(final V resource, T model, Target<V> target,
                 boolean isFromMemoryCache,
                 boolean isFirstResource) {
             width = resource.getIntrinsicWidth();
@@ -151,6 +169,11 @@ public class ImageFragment extends Fragment {
 
             if (isVisibleToUser && !isOrientationUpdated) {
                 updateOrientation();
+            }
+
+            if (resource instanceof Animatable) {
+                mHandler.removeCallbacks(mUpdateGifRunnable);
+                mHandler.postDelayed(mUpdateGifRunnable, 10);
             }
             return false;
         }
