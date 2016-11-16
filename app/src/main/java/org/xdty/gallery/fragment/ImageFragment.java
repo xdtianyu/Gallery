@@ -1,6 +1,7 @@
 package org.xdty.gallery.fragment;
 
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -41,7 +42,7 @@ public class ImageFragment extends Fragment {
     RequestManager mRequestManager;
 
     @Inject
-    GenericRequestBuilder<Media, InputStream, byte[], pl.droidsonroids.gif.GifDrawable> gifGlide;
+    GenericRequestBuilder<Media, InputStream, byte[], GifDrawable> mGifRequestBuilder;
 
     private boolean isOrientationUpdated = false;
     private boolean isVisibleToUser = false;
@@ -107,9 +108,14 @@ public class ImageFragment extends Fragment {
         String uri = getArguments().getString(URI);
 
         if (uri != null && uri.toLowerCase().endsWith("gif")) {
-            loadGif(uri);
+            mGifRequestBuilder.load(mDataSource.getMedia(uri))
+                    .listener(new MediaRequestListener<Media, GifDrawable>())
+                    .into(image);
         } else {
-            loadImage(uri);
+            mRequestManager.load(mDataSource.getMedia(uri))
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .listener(new MediaRequestListener<Media, GlideDrawable>())
+                    .into(image);
 
         }
 
@@ -128,56 +134,25 @@ public class ImageFragment extends Fragment {
         return view;
     }
 
-    private void loadGif(String uri) {
-        gifGlide.load(mDataSource.getMedia(uri))
-                .listener(new RequestListener<Media, GifDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, Media model,
-                            Target<GifDrawable> target,
-                            boolean isFirstResource) {
-                        return false;
-                    }
+    private class MediaRequestListener<T, V extends Drawable> implements RequestListener<T, V> {
 
-                    @Override
-                    public boolean onResourceReady(final GifDrawable resource, Media model,
-                            Target<GifDrawable> target, boolean isFromMemoryCache,
-                            boolean isFirstResource) {
-                        width = resource.getIntrinsicWidth();
-                        height = resource.getIntrinsicHeight();
+        @Override
+        public boolean onException(Exception e, T model, Target<V> target,
+                boolean isFirstResource) {
+            return false;
+        }
 
-                        if (isVisibleToUser && !isOrientationUpdated) {
-                            updateOrientation();
-                        }
-                        return false;
-                    }
-                }).into(image);
-    }
+        @Override
+        public boolean onResourceReady(V resource, T model, Target<V> target,
+                boolean isFromMemoryCache,
+                boolean isFirstResource) {
+            width = resource.getIntrinsicWidth();
+            height = resource.getIntrinsicHeight();
 
-    private void loadImage(String uri) {
-        mRequestManager.load(mDataSource.getMedia(uri))
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .listener(new RequestListener<Media, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, Media model,
-                            Target<GlideDrawable> target,
-                            boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(final GlideDrawable resource, Media model,
-                            Target<GlideDrawable> target, boolean isFromMemoryCache,
-                            boolean isFirstResource) {
-                        width = resource.getIntrinsicWidth();
-                        height = resource.getIntrinsicHeight();
-
-                        if (isVisibleToUser && !isOrientationUpdated) {
-                            updateOrientation();
-                        }
-                        return false;
-                    }
-                })
-                .fitCenter()
-                .into(image);
+            if (isVisibleToUser && !isOrientationUpdated) {
+                updateOrientation();
+            }
+            return false;
+        }
     }
 }

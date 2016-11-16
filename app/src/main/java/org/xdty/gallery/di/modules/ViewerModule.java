@@ -50,7 +50,7 @@ public class ViewerModule {
 
     @Singleton
     @Provides
-    GenericRequestBuilder<Media, InputStream, byte[], GifDrawable> provideGifGlide(
+    GenericRequestBuilder<Media, InputStream, byte[], GifDrawable> provideGifRequestBuilder(
             RequestManager requestManager) {
 
         return requestManager.using(new MediaLoader(mView), InputStream.class)
