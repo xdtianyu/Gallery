@@ -1,7 +1,8 @@
-package org.xdty.gallery.model;
+package org.xdty.gallery.model.media;
 
 import android.support.annotation.NonNull;
 
+import org.xdty.gallery.model.Media;
 import org.xdty.webdav.WebDavAuth;
 import org.xdty.webdav.WebDavFile;
 

@@ -1,4 +1,6 @@
-package org.xdty.gallery.model;
+package org.xdty.gallery.model.media;
+
+import org.xdty.gallery.model.Media;
 
 import java.io.File;
 import java.io.FileInputStream;

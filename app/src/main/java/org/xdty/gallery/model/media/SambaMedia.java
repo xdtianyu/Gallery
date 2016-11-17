@@ -1,6 +1,8 @@
-package org.xdty.gallery.model;
+package org.xdty.gallery.model.media;
 
 import android.support.annotation.NonNull;
+
+import org.xdty.gallery.model.Media;
 
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;

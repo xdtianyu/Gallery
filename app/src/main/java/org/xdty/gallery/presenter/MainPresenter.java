@@ -5,16 +5,16 @@ import com.google.gson.Gson;
 import org.xdty.gallery.application.Application;
 import org.xdty.gallery.contract.MainContact;
 import org.xdty.gallery.data.MediaDataSource;
-import org.xdty.gallery.model.LocalMedia;
 import org.xdty.gallery.model.Media;
-import org.xdty.gallery.model.SambaMedia;
-import org.xdty.gallery.model.ServerInfo;
-import org.xdty.gallery.model.WebDavMedia;
+import org.xdty.gallery.model.database.Database;
+import org.xdty.gallery.model.db.Server;
+import org.xdty.gallery.model.media.LocalMedia;
+import org.xdty.gallery.model.media.SambaMedia;
+import org.xdty.gallery.model.media.WebDavMedia;
 import org.xdty.gallery.setting.Setting;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -30,6 +30,10 @@ public class MainPresenter implements MainContact.Presenter {
 
     @Inject
     MediaDataSource mMediaDataSource;
+
+    @Inject
+    Database mDatabase;
+
     boolean isRoot = false;
     private MainContact.View mView;
     private List<Media> mMediaFileList = new ArrayList<>();
@@ -50,16 +54,20 @@ public class MainPresenter implements MainContact.Presenter {
 
             mMediaDataSource.addRoot(mSetting.getLocalPath(), null, null);
 
-            Set<String> servers = mSetting.getServers();
-            for (String server : servers) {
-                ServerInfo info = mGson.fromJson(server, ServerInfo.class);
-                mMediaDataSource.addRoot(info.getUri(), info.getUser(), info.getPass());
-            }
+            mDatabase.getServers().subscribe(new Action1<List<Server>>() {
+                @Override
+                public void call(List<Server> servers) {
+                    for (Server server : servers) {
+                        mMediaDataSource.addRoot(server.getUri(), server.getUsername(),
+                                server.getPassword());
+                    }
+                    loadRootDir();
+                }
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        loadRootDir();
     }
 
     @Override
@@ -78,10 +86,11 @@ public class MainPresenter implements MainContact.Presenter {
 
     @Override
     public void addServer(String uri, String user, String pass) {
-        String server = mGson.toJson(new ServerInfo(uri, user, pass));
-
-        mSetting.addServer(server);
-
+        Server server = new Server();
+        server.setUri(uri);
+        server.setUsername(user);
+        server.setPassword(pass);
+        mDatabase.addServer(server);
         mMediaDataSource.addRoot(uri, user, pass);
     }
 
