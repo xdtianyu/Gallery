@@ -4,7 +4,6 @@
 
     <uk.co.senab.photoview.PhotoView
         android:id="@+id/image"
-        style="@style/item_transition"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/app_name"/>

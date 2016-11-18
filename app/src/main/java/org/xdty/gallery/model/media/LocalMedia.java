@@ -1,5 +1,7 @@
 package org.xdty.gallery.model.media;
 
+import android.support.annotation.NonNull;
+
 import org.xdty.gallery.model.Media;
 
 import java.io.File;
@@ -12,7 +14,7 @@ import java.util.List;
 
 public class LocalMedia extends File implements Media<LocalMedia>, Comparable<File> {
 
-    private final static String[] SCHEME = new String[]{"file"};
+    private final static String[] SCHEME = new String[] { "file" };
 
     private LocalMedia parent;
     private List<LocalMedia> children = new ArrayList<>();
@@ -158,5 +160,10 @@ public class LocalMedia extends File implements Media<LocalMedia>, Comparable<Fi
         }
 
         return equal;
+    }
+
+    @Override
+    public int compareTo(@NonNull File another) {
+        return NumericComparator.factory().compare(this.getName(), another.getName());
     }
 }

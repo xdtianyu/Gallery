@@ -207,6 +207,6 @@ public class SambaMedia extends SmbFile implements Media<SambaMedia>, Comparable
 
     @Override
     public int compareTo(@NonNull SambaMedia another) {
-        return getName().compareTo(another.getName());
+        return NumericComparator.factory().compare(this, another);
     }
 }

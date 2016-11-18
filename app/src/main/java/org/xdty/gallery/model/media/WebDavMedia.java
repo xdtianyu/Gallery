@@ -179,6 +179,6 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
 
     @Override
     public int compareTo(@NonNull WebDavMedia another) {
-        return getName().compareTo(another.getName());
+        return NumericComparator.factory().compare(this, another);
     }
 }
