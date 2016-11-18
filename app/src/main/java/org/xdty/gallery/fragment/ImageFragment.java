@@ -69,6 +69,15 @@ public class ImageFragment extends Fragment {
         }
     };
 
+    private Runnable mUpdateOrientationRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (getActivity() != null) {
+                ((ViewerActivity) getActivity()).updateOrientation(width, height);
+            }
+        }
+    };
+
     public ImageFragment() {
         mHandler = new Handler(Looper.getMainLooper());
     }
@@ -100,15 +109,15 @@ public class ImageFragment extends Fragment {
     }
 
     private void updateOrientation() {
-        if (getActivity() != null) {
-            ((ViewerActivity) getActivity()).updateOrientation(width, height);
-        }
+        mHandler.removeCallbacks(mUpdateOrientationRunnable);
+        mHandler.postDelayed(mUpdateOrientationRunnable, 10);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mHandler.removeCallbacks(mUpdateGifRunnable);
+        mHandler.removeCallbacks(mUpdateOrientationRunnable);
     }
 
     @Override
