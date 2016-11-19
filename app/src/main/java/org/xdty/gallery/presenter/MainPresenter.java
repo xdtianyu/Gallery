@@ -8,6 +8,7 @@ import org.xdty.gallery.data.MediaDataSource;
 import org.xdty.gallery.model.Media;
 import org.xdty.gallery.model.database.Database;
 import org.xdty.gallery.model.db.Server;
+import org.xdty.gallery.model.media.AutoIndexMedia;
 import org.xdty.gallery.model.media.LocalMedia;
 import org.xdty.gallery.model.media.SambaMedia;
 import org.xdty.gallery.model.media.WebDavMedia;
@@ -51,6 +52,7 @@ public class MainPresenter implements MainContact.Presenter {
             mMediaDataSource.register(new LocalMedia());
             mMediaDataSource.register(new SambaMedia());
             mMediaDataSource.register(new WebDavMedia());
+            mMediaDataSource.register(new AutoIndexMedia());
 
             mMediaDataSource.addRoot(mSetting.getLocalPath(), null, null);
 

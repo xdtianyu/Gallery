@@ -2,41 +2,37 @@ package org.xdty.gallery.model.media;
 
 import android.support.annotation.NonNull;
 
+import org.xdty.autoindex.AutoIndexFile;
 import org.xdty.gallery.model.Media;
 import org.xdty.http.HttpAuth;
-import org.xdty.webdav.WebDavFile;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Comparable<WebDavMedia> {
+public class AutoIndexMedia extends AutoIndexFile
+        implements Media<AutoIndexMedia>, Comparable<AutoIndexMedia> {
 
-    private final static String[] SCHEME = new String[] { "dav", "davs" };
+    private final static String[] SCHEME = new String[] { "index", "indexs" };
 
-    private WebDavMedia parent;
-    private List<WebDavMedia> children = new ArrayList<>();
+    private AutoIndexMedia parent;
+    private List<AutoIndexMedia> children = new ArrayList<>();
     private int position;
     private boolean hasImage = false;
 
-    public WebDavMedia() throws MalformedURLException {
-        super("dav://");
+    public AutoIndexMedia() throws MalformedURLException {
+        super();
     }
 
-    public WebDavMedia(String url) throws MalformedURLException {
+    public AutoIndexMedia(String url) throws MalformedURLException {
         super(url);
     }
 
-    public WebDavMedia(WebDavFile media) throws MalformedURLException {
+    public AutoIndexMedia(AutoIndexFile media) throws MalformedURLException {
         super(media.getPath());
         setParent(media.getParent());
         setIsDirectory(media.isDirectory());
-    }
-
-    @Override
-    public WebDavMedia[] listFiles() throws MalformedURLException {
-        return (WebDavMedia[]) super.listFiles();
     }
 
     @Override
@@ -50,12 +46,12 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
-    public WebDavMedia parent() {
+    public AutoIndexMedia parent() {
         return parent;
     }
 
     @Override
-    public void setParent(WebDavMedia parent) {
+    public void setParent(AutoIndexMedia parent) {
         this.parent = parent;
     }
 
@@ -72,14 +68,14 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
-    public synchronized List<WebDavMedia> children() {
+    public synchronized List<AutoIndexMedia> children() {
 
         if (children.size() == 0) {
             try {
-                WebDavFile[] files = super.listFiles();
+                List<AutoIndexFile> files = super.listFiles();
                 if (files != null) {
-                    for (WebDavFile file : files) {
-                        WebDavMedia media = new WebDavMedia(file);
+                    for (AutoIndexFile file : files) {
+                        AutoIndexMedia media = new AutoIndexMedia(file);
                         media.setParent(this);
                         children.add(media);
 
@@ -114,18 +110,18 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
-    public WebDavMedia[] listMedia() {
-        ArrayList<WebDavMedia> list = new ArrayList<>();
+    public AutoIndexMedia[] listMedia() {
+        ArrayList<AutoIndexMedia> list = new ArrayList<>();
         try {
-            WebDavFile[] files = super.listFiles();
-            for (WebDavFile file : files) {
-                list.add(new WebDavMedia(file));
+            List<AutoIndexFile> files = super.listFiles();
+            for (AutoIndexFile file : files) {
+                list.add(new AutoIndexMedia(file));
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
         Collections.sort(list);
-        return list.toArray(new WebDavMedia[list.size()]);
+        return list.toArray(new AutoIndexMedia[list.size()]);
     }
 
     @Override
@@ -139,9 +135,9 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
-    public WebDavMedia fromUri(String uri) {
+    public AutoIndexMedia fromUri(String uri) {
         try {
-            return new WebDavMedia(uri);
+            return new AutoIndexMedia(uri);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -149,7 +145,7 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
-    public WebDavMedia auth(String uri, String directory, String username, String password) {
+    public AutoIndexMedia auth(String uri, String directory, String username, String password) {
         if (HttpAuth.getAuth(uri) == null) {
             HttpAuth.addAuth(uri, username, password);
         }
@@ -178,7 +174,7 @@ public class WebDavMedia extends WebDavFile implements Media<WebDavMedia>, Compa
     }
 
     @Override
-    public int compareTo(@NonNull WebDavMedia another) {
+    public int compareTo(@NonNull AutoIndexMedia another) {
         return NumericComparator.factory().compare(this, another);
     }
 }

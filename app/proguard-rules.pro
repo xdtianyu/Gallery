@@ -56,6 +56,11 @@
     @retrofit.http.* <methods>;
 }
 
+-dontwarn okio.**
+-keep class retrofit2.** { *; }
+-dontwarn retrofit2.**
+-dontwarn retrofit2.Platform$Java8
+
 -keep class android.support.v7.** { public protected *; }
 -keep class android.support.v4.** { public protected *; }
 
