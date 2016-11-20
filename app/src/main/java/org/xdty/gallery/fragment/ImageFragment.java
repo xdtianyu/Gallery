@@ -26,6 +26,7 @@ import org.xdty.gallery.di.DaggerViewerComponent;
 import org.xdty.gallery.di.modules.AppModule;
 import org.xdty.gallery.di.modules.ViewerModule;
 import org.xdty.gallery.model.Media;
+import org.xdty.gallery.view.DraggableRelativeLayout;
 import org.xdty.gallery.view.gesture.RotateGestureDetector;
 
 import java.io.InputStream;
@@ -54,6 +55,7 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
     private boolean isVisibleToUser = false;
     private int width = -1;
     private int height = -1;
+    private DraggableRelativeLayout mLayout;
     private PhotoView mPhotoView;
 
     private String mUri;
@@ -102,6 +104,10 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
                 @Override
                 public boolean onRotateBegin(RotateGestureDetector detector) {
+                    mLayout.setDraggable(false);
+                    if (getActivity() != null) {
+                        ((ViewerActivity) getActivity()).setPagingEnabled(false);
+                    }
                     rotate = mDataSource.getRotate(mUri);
                     return true;
                 }
@@ -134,6 +140,27 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
                         mDataSource.setRotate(mUri, (int) mPhotoView.getRotation());
                         rotate = 0;
                     }
+
+                    mLayout.setDraggable(true);
+
+                    if (getActivity() != null) {
+                        ((ViewerActivity) getActivity()).setPagingEnabled(true);
+                    }
+                }
+            };
+
+    private DraggableRelativeLayout.DragListener mDragListener =
+            new DraggableRelativeLayout.DragListener() {
+                @Override
+                public void onDraggedVertical(int top, int height) {
+                    float scale = (height - Math.abs(top)) / (float) height;
+                    mPhotoView.setMinimumScale(0.7f);
+                    mPhotoView.setScale(scale);
+                }
+
+                @Override
+                public void onViewReleased(float xvel, float yvel) {
+                    mPhotoView.setMinimumScale(1f);
                 }
             };
 
@@ -194,6 +221,9 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
         View view = inflater.inflate(R.layout.fragment_viewer, container, false);
 
         mRotationDetector = new RotateGestureDetector(getActivity(), mOnRotateGestureListener);
+
+        mLayout = (DraggableRelativeLayout) view.findViewById(R.id.layout);
+        mLayout.setDragListener(mDragListener);
 
         mPhotoView = (PhotoView) view.findViewById(R.id.image);
 

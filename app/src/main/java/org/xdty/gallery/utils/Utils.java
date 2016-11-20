@@ -24,7 +24,7 @@ import java.util.Locale;
 
 public class Utils {
 
-    public final static String TAG = "Utils";
+    private final static String TAG = "Utils";
 
     private static SimpleDateFormat format =
             new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH);

@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -29,6 +28,7 @@ import org.xdty.gallery.di.modules.ViewerModule;
 import org.xdty.gallery.model.Media;
 import org.xdty.gallery.utils.Constants;
 import org.xdty.gallery.view.PagerAdapter;
+import org.xdty.gallery.view.ViewPager;
 
 import java.util.List;
 
@@ -289,6 +289,10 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public void setPresenter(ViewerContact.Presenter presenter) {
 
+    }
+
+    public void setPagingEnabled(boolean enabled) {
+        mViewPager.setPagingEnabled(enabled);
     }
 
     public void setTouchEventListener(TouchEventListener listener) {
