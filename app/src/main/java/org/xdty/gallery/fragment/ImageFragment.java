@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -230,7 +229,6 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
     @Override
     public boolean onDispatchTouchEvent(MotionEvent motionEvent) {
-        Log.e(TAG, motionEvent.toString());
         return mRotationDetector.onTouchEvent(motionEvent);
     }
 
