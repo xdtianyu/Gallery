@@ -10,6 +10,8 @@ public final class MediaCache {
 
     private LruCache<String, Media> mCache = new LruCache<>(100000);
 
+    private LruCache<String, Integer> mRotateCache = new LruCache<>(500);
+
     static MediaCache getInstance() {
         return SingletonHelper.INSTANCE;
     }
@@ -20,6 +22,15 @@ public final class MediaCache {
 
     Media get(String key) {
         return mCache.get(key);
+    }
+
+    void putRotation(String key, int rotate) {
+        mRotateCache.put(key, rotate);
+    }
+
+    int getRotate(String key) {
+        Integer value = mRotateCache.get(key);
+        return value != null ? value : 0;
     }
 
     void put(List<Media> medias) {

@@ -21,7 +21,7 @@ import java.util.List;
 
 public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
-    public final static String TAG = GalleryAdapter.class.getSimpleName();
+    private final static String TAG = GalleryAdapter.class.getSimpleName();
 
     private static final int TYPE_MEDIA = 1000;
 

@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
@@ -49,6 +50,8 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     private Handler mMainHandler = new Handler(Looper.getMainLooper());
     private Handler mHandler = new Handler();
     private Runnable hideSystemUIRunnable;
+
+    private TouchEventListener mTouchEventListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -226,6 +229,14 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (mTouchEventListener != null) {
+            mTouchEventListener.onDispatchTouchEvent(ev);
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
@@ -278,6 +289,14 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public void setPresenter(ViewerContact.Presenter presenter) {
 
+    }
+
+    public void setTouchEventListener(TouchEventListener listener) {
+        mTouchEventListener = listener;
+    }
+
+    public interface TouchEventListener {
+        boolean onDispatchTouchEvent(MotionEvent motionEvent);
     }
 
 }

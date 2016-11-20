@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -25,6 +27,7 @@ import org.xdty.gallery.di.DaggerViewerComponent;
 import org.xdty.gallery.di.modules.AppModule;
 import org.xdty.gallery.di.modules.ViewerModule;
 import org.xdty.gallery.model.Media;
+import org.xdty.gallery.view.gesture.RotateGestureDetector;
 
 import java.io.InputStream;
 
@@ -36,7 +39,9 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 import static org.xdty.gallery.utils.Constants.URI;
 
-public class ImageFragment extends Fragment {
+public class ImageFragment extends Fragment implements ViewerActivity.TouchEventListener {
+
+    private static final String TAG = ImageFragment.class.getSimpleName();
 
     @Inject
     MediaDataSource mDataSource;
@@ -50,15 +55,19 @@ public class ImageFragment extends Fragment {
     private boolean isVisibleToUser = false;
     private int width = -1;
     private int height = -1;
-    private PhotoView image;
+    private PhotoView mPhotoView;
+
+    private String mUri;
 
     private Handler mHandler;
+
+    private RotateGestureDetector mRotationDetector;
 
     private Runnable mUpdateGifRunnable = new Runnable() {
         @Override
         public void run() {
-            if (image != null && image.getDrawable() instanceof Animatable) {
-                Animatable animatable = (Animatable) image.getDrawable();
+            if (mPhotoView != null && mPhotoView.getDrawable() instanceof Animatable) {
+                Animatable animatable = (Animatable) mPhotoView.getDrawable();
                 if (isVisibleToUser) {
                     animatable.start();
                 } else {
@@ -77,6 +86,57 @@ public class ImageFragment extends Fragment {
             }
         }
     };
+
+    private RotateGestureDetector.OnRotateGestureListener mOnRotateGestureListener =
+            new RotateGestureDetector.OnRotateGestureListener() {
+                int rotate = 0;
+
+                @Override
+                public boolean onRotate(RotateGestureDetector detector) {
+
+                    if (mPhotoView != null) {
+                        float degree = detector.getRotationDegreesDelta();
+                        mPhotoView.setRotation(-degree + rotate);
+                    }
+                    return false;
+                }
+
+                @Override
+                public boolean onRotateBegin(RotateGestureDetector detector) {
+                    rotate = mDataSource.getRotate(mUri);
+                    return true;
+                }
+
+                @Override
+                public void onRotateEnd(RotateGestureDetector detector) {
+                    if (mPhotoView != null) {
+                        // set rotation and save state
+                        float degree = -detector.getRotationDegreesDelta() + rotate;
+
+                        int n = Math.round(degree / 90);
+                        n = n % 4;
+                        if (n < 0) {
+                            n += 4;
+                        }
+                        switch (n) {
+                            case 0:
+                                mPhotoView.setRotation(0);
+                                break;
+                            case 1:
+                                mPhotoView.setRotation(90);
+                                break;
+                            case 2:
+                                mPhotoView.setRotation(180);
+                                break;
+                            case 3:
+                                mPhotoView.setRotation(270);
+                                break;
+                        }
+                        mDataSource.setRotate(mUri, (int) mPhotoView.getRotation());
+                        rotate = 0;
+                    }
+                }
+            };
 
     public ImageFragment() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -99,6 +159,9 @@ public class ImageFragment extends Fragment {
         if (isVisibleToUser) {
             if (!isOrientationUpdated) {
                 updateOrientation();
+            }
+            if (getActivity() != null) {
+                ((ViewerActivity) getActivity()).setTouchEventListener(this);
             }
         } else {
             isOrientationUpdated = false;
@@ -131,22 +194,25 @@ public class ImageFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_viewer, container, false);
 
-        image = (PhotoView) view.findViewById(R.id.image);
-        String uri = getArguments().getString(URI);
+        mRotationDetector = new RotateGestureDetector(getActivity(), mOnRotateGestureListener);
 
-        if (uri != null && uri.toLowerCase().endsWith("gif")) {
-            mGifRequestBuilder.load(mDataSource.getMedia(uri))
+        mPhotoView = (PhotoView) view.findViewById(R.id.image);
+
+        mUri = getArguments().getString(URI);
+
+        if (mUri != null && mUri.toLowerCase().endsWith("gif")) {
+            mGifRequestBuilder.load(mDataSource.getMedia(mUri))
                     .listener(new MediaRequestListener<Media, GifDrawable>())
-                    .into(image);
+                    .into(mPhotoView);
         } else {
-            mRequestManager.load(mDataSource.getMedia(uri))
+            mRequestManager.load(mDataSource.getMedia(mUri))
                     .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .listener(new MediaRequestListener<Media, GlideDrawable>())
-                    .into(image);
+                    .into(mPhotoView);
 
         }
 
-        image.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+        mPhotoView.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
             @Override
             public void onViewTap(View view, float x, float y) {
                 ViewerActivity out = (ViewerActivity) getActivity();
@@ -158,7 +224,14 @@ public class ImageFragment extends Fragment {
             }
         });
 
+        mPhotoView.setRotation(mDataSource.getRotate(mUri));
         return view;
+    }
+
+    @Override
+    public boolean onDispatchTouchEvent(MotionEvent motionEvent) {
+        Log.e(TAG, motionEvent.toString());
+        return mRotationDetector.onTouchEvent(motionEvent);
     }
 
     private class MediaRequestListener<T, V extends Drawable> implements RequestListener<T, V> {
@@ -178,6 +251,10 @@ public class ImageFragment extends Fragment {
 
             if (isVisibleToUser && !isOrientationUpdated) {
                 updateOrientation();
+
+                if (getActivity() != null) {
+                    ((ViewerActivity) getActivity()).setTouchEventListener(ImageFragment.this);
+                }
             }
 
             if (resource instanceof Animatable) {

@@ -20,6 +20,10 @@ public interface MediaDataSource {
 
     Media getMedia(String uri);
 
+    int getRotate(String uri);
+
+    void setRotate(String uri, int rotate);
+
     Observable<List<Media>> loadDir(Media media, boolean isRefresh);
 
     Observable<List<Media>> loadMediaList(Media media);

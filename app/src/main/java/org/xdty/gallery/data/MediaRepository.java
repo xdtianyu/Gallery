@@ -95,6 +95,16 @@ public class MediaRepository implements MediaDataSource {
         return fromUri(uri);
     }
 
+    @Override
+    public int getRotate(String uri) {
+        return mMediaCache.getRotate(uri);
+    }
+
+    @Override
+    public void setRotate(String uri, int rotate) {
+        mMediaCache.putRotation(uri, rotate);
+    }
+
     private Media fromUri(String uri) {
         if (uri.contains("://")) {
             String scheme = uri.substring(0, uri.indexOf("://"));
