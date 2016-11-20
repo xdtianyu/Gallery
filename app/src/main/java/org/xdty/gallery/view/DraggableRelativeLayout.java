@@ -36,9 +36,19 @@ public class DraggableRelativeLayout extends RelativeLayout {
         }
 
         @Override
+        public void onViewDragStateChanged(int state) {
+            super.onViewDragStateChanged(state);
+            if (mDragListener != null && state == 0) {
+                mDragListener.onViewDragFinished();
+            }
+        }
+
+        @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
             float alpha = (child.getHeight() - Math.abs(top)) * 1f / child.getHeight();
+
             setAlpha(alpha);
+
             if (mDragListener != null) {
                 mDragListener.onDraggedVertical(top, child.getHeight());
             }
@@ -139,5 +149,7 @@ public class DraggableRelativeLayout extends RelativeLayout {
         void onDraggedVertical(int top, int height);
 
         void onViewReleased(float xvel, float yvel);
+
+        void onViewDragFinished();
     }
 }

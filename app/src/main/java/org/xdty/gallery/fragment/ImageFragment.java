@@ -1,5 +1,6 @@
 package org.xdty.gallery.fragment;
 
+import android.content.Context;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -151,16 +152,28 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
     private DraggableRelativeLayout.DragListener mDragListener =
             new DraggableRelativeLayout.DragListener() {
+                float releaseScale = 1f;
+                float scale = 1f;
+
                 @Override
                 public void onDraggedVertical(int top, int height) {
-                    float scale = (height - Math.abs(top)) / (float) height;
-                    mPhotoView.setMinimumScale(0.7f);
+                    scale = (height - Math.abs(top)) / (float) height;
+                    mPhotoView.setMinimumScale(0.85f);
                     mPhotoView.setScale(scale);
                 }
 
                 @Override
                 public void onViewReleased(float xvel, float yvel) {
                     mPhotoView.setMinimumScale(1f);
+                    releaseScale = scale;
+                }
+
+                @Override
+                public void onViewDragFinished() {
+                    if (getActivity() != null && releaseScale < 0.8f) {
+                        getActivity().onBackPressed();
+                    }
+                    releaseScale = 1f;
                 }
             };
 
@@ -210,13 +223,18 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
         DaggerViewerComponent.builder()
                 .appModule(new AppModule((Application) getActivity().getApplication()))
                 .viewerModule(new ViewerModule((ViewerActivity) getActivity()))
                 .build().inject(this);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_viewer, container, false);
 
