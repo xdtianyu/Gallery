@@ -152,14 +152,18 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
     private DraggableRelativeLayout.DragListener mDragListener =
             new DraggableRelativeLayout.DragListener() {
+                final float threshold = 0.85f;
                 float releaseScale = 1f;
                 float scale = 1f;
 
                 @Override
                 public void onDraggedVertical(int top, int height) {
                     scale = (height - Math.abs(top)) / (float) height;
-                    mPhotoView.setMinimumScale(0.85f);
-                    mPhotoView.setScale(scale);
+                    if (scale >= threshold) {
+                        mPhotoView.setMinimumScale(threshold);
+                        mPhotoView.setScale(scale);
+                        mPhotoView.setAlpha(scale);
+                    }
                 }
 
                 @Override
@@ -170,7 +174,7 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
                 @Override
                 public void onViewDragFinished() {
-                    if (getActivity() != null && releaseScale < 0.85f) {
+                    if (getActivity() != null && releaseScale < threshold) {
                         getActivity().onBackPressed();
                     }
                     releaseScale = 1f;
