@@ -52,7 +52,6 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
     @Inject
     GenericRequestBuilder<Media, InputStream, byte[], GifDrawable> mGifRequestBuilder;
 
-    private boolean isOrientationUpdated = false;
     private boolean isVisibleToUser = false;
     private int width = -1;
     private int height = -1;
@@ -198,14 +197,10 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
         this.isVisibleToUser = isVisibleToUser;
 
         if (isVisibleToUser) {
-            if (!isOrientationUpdated) {
-                updateOrientation();
-            }
+            updateOrientation();
             if (getActivity() != null) {
                 ((ViewerActivity) getActivity()).setTouchEventListener(this);
             }
-        } else {
-            isOrientationUpdated = false;
         }
         mHandler.removeCallbacks(mUpdateGifRunnable);
         mHandler.postDelayed(mUpdateGifRunnable, 10);
@@ -298,7 +293,7 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
             width = resource.getIntrinsicWidth();
             height = resource.getIntrinsicHeight();
 
-            if (isVisibleToUser && !isOrientationUpdated) {
+            if (isVisibleToUser) {
                 updateOrientation();
 
                 if (getActivity() != null) {
