@@ -22,6 +22,7 @@ public class ViewerPresenter implements ViewerContact.Presenter {
     private int mSelectedPosition = -1;
 
     private List<Media> mMedias = new ArrayList<>();
+    private List<Media> mFiles = new ArrayList<>();
 
     public ViewerPresenter(ViewerContact.View view) {
         mView = view;
@@ -39,16 +40,23 @@ public class ViewerPresenter implements ViewerContact.Presenter {
         Media media = mDataSource.getMedia(uri);
         mView.load(media);
 
-        mSelectedPosition = position;
-
         Media parent = mDataSource.getMedia(parentUri);
+
+        mDataSource.loadDir(parent, false).subscribe(new Action1<List<Media>>() {
+            @Override
+            public void call(List<Media> medias) {
+                mFiles.addAll(medias);
+            }
+        });
+
         mDataSource.loadMediaList(parent).subscribe(new Action1<List<Media>>() {
             @Override
             public void call(List<Media> medias) {
                 mMedias.clear();
                 mMedias.addAll(medias);
-                mView.replaceData(mMedias, position);
-                mView.setTitle(mMedias.get(position).getName());
+                mSelectedPosition = mMedias.indexOf(mFiles.get(position));
+                mView.replaceData(mMedias, mSelectedPosition);
+                mView.setTitle(mMedias.get(mSelectedPosition).getName());
             }
         });
     }
@@ -62,7 +70,7 @@ public class ViewerPresenter implements ViewerContact.Presenter {
 
     @Override
     public int getPosition() {
-        return mSelectedPosition;
+        return mFiles.indexOf(mMedias.get(mSelectedPosition));
     }
 
     @Override
