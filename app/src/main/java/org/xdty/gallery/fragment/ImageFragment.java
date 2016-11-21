@@ -56,7 +56,7 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
     private boolean isVisibleToUser = false;
     private int width = -1;
     private int height = -1;
-    private DraggableRelativeLayout mLayout;
+    private DraggableRelativeLayout mDraggableLayout;
     private PhotoView mPhotoView;
 
     private String mUri;
@@ -105,7 +105,7 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
                 @Override
                 public boolean onRotateBegin(RotateGestureDetector detector) {
-                    mLayout.setDraggable(false);
+                    mDraggableLayout.setDraggable(false);
                     if (getActivity() != null) {
                         ((ViewerActivity) getActivity()).setPagingEnabled(false);
                     }
@@ -142,7 +142,7 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
                         rotate = 0;
                     }
 
-                    mLayout.setDraggable(true);
+                    mDraggableLayout.setDraggable(true);
 
                     if (getActivity() != null) {
                         ((ViewerActivity) getActivity()).setPagingEnabled(true);
@@ -170,7 +170,7 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
                 @Override
                 public void onViewDragFinished() {
-                    if (getActivity() != null && releaseScale < 0.8f) {
+                    if (getActivity() != null && releaseScale < 0.85f) {
                         getActivity().onBackPressed();
                     }
                     releaseScale = 1f;
@@ -240,8 +240,9 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
         mRotationDetector = new RotateGestureDetector(getActivity(), mOnRotateGestureListener);
 
-        mLayout = (DraggableRelativeLayout) view.findViewById(R.id.layout);
-        mLayout.setDragListener(mDragListener);
+        mDraggableLayout = (DraggableRelativeLayout) view.findViewById(R.id.layout);
+        mDraggableLayout.setDragListener(mDragListener);
+        mDraggableLayout.setThreshold(0.15f);
 
         mPhotoView = (PhotoView) view.findViewById(R.id.image);
 

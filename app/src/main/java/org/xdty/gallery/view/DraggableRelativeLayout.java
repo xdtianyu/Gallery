@@ -6,7 +6,6 @@ import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -23,6 +22,10 @@ public class DraggableRelativeLayout extends RelativeLayout {
 
     private int x, y;
 
+    private float mThreshold = 1f;
+
+    private boolean mAlphaMode = false;
+
     private ViewDragHelper.Callback mDragCallback = new ViewDragHelper.Callback() {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
@@ -32,7 +35,6 @@ public class DraggableRelativeLayout extends RelativeLayout {
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
             super.onViewPositionChanged(changedView, left, top, dx, dy);
-            Log.e(TAG, changedView.toString());
         }
 
         @Override
@@ -45,9 +47,7 @@ public class DraggableRelativeLayout extends RelativeLayout {
 
         @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
-            float alpha = (child.getHeight() - Math.abs(top)) * 1f / child.getHeight();
-
-            setAlpha(alpha);
+            setAlpha(child.getHeight(), Math.abs(top));
 
             if (mDragListener != null) {
                 mDragListener.onDraggedVertical(top, child.getHeight());
@@ -126,9 +126,8 @@ public class DraggableRelativeLayout extends RelativeLayout {
         if (mViewDragHelper.continueSettling(true)) {
             int top = getChildAt(0).getTop();
             int height = getChildAt(0).getHeight();
-            float alpha = (height - Math.abs(top)) * 1f / height;
 
-            setAlpha(alpha);
+            setAlpha(height, top);
 
             if (mDragListener != null) {
                 mDragListener.onDraggedVertical(top, getChildAt(0).getHeight());
@@ -139,6 +138,28 @@ public class DraggableRelativeLayout extends RelativeLayout {
 
     public void setDraggable(boolean enabled) {
         isDragEnabled = enabled;
+    }
+
+    public void setThreshold(float threshold) {
+        mThreshold = threshold;
+    }
+
+    public void setAlphaMode(boolean alphaMode) {
+        mAlphaMode = alphaMode;
+    }
+
+    private void setAlpha(int height, int top) {
+        float alpha = (height - Math.abs(top) / mThreshold) / height;
+
+        if (alpha < 0) {
+            alpha = 0f;
+        }
+
+        if (mAlphaMode) {
+            setAlpha(alpha);
+        } else {
+            getBackground().setAlpha((int) (alpha * 255));
+        }
     }
 
     public void setDragListener(DragListener listener) {
