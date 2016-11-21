@@ -54,7 +54,11 @@ public class ViewerPresenter implements ViewerContact.Presenter {
             public void call(List<Media> medias) {
                 mMedias.clear();
                 mMedias.addAll(medias);
-                mSelectedPosition = mMedias.indexOf(mFiles.get(position));
+                if (mFiles.size() > position) {
+                    mSelectedPosition = mMedias.indexOf(mFiles.get(position));
+                } else {
+                    mSelectedPosition = position;
+                }
                 mView.replaceData(mMedias, mSelectedPosition);
                 mView.setTitle(mMedias.get(mSelectedPosition).getName());
             }

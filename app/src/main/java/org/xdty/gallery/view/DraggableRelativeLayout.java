@@ -26,6 +26,13 @@ public class DraggableRelativeLayout extends RelativeLayout {
 
     private boolean mAlphaMode = false;
 
+    private Runnable mEnableRunnable = new Runnable() {
+        @Override
+        public void run() {
+            isDragEnabled = true;
+        }
+    };
+
     private ViewDragHelper.Callback mDragCallback = new ViewDragHelper.Callback() {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
@@ -111,19 +118,25 @@ public class DraggableRelativeLayout extends RelativeLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return mViewDragHelper.shouldInterceptTouchEvent(ev);
+        if (isDragEnabled) {
+            return mViewDragHelper.shouldInterceptTouchEvent(ev);
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        mViewDragHelper.processTouchEvent(event);
-        return true;
+        if (isDragEnabled) {
+            mViewDragHelper.processTouchEvent(event);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void computeScroll() {
         super.computeScroll();
-        if (mViewDragHelper.continueSettling(true)) {
+        if (isDragEnabled && mViewDragHelper.continueSettling(true)) {
             int top = getChildAt(0).getTop();
             int height = getChildAt(0).getHeight();
 
@@ -137,7 +150,12 @@ public class DraggableRelativeLayout extends RelativeLayout {
     }
 
     public void setDraggable(boolean enabled) {
-        isDragEnabled = enabled;
+        removeCallbacks(mEnableRunnable);
+        if (enabled) {
+            postDelayed(mEnableRunnable, 100);
+        } else {
+            isDragEnabled = false;
+        }
     }
 
     public void setThreshold(float threshold) {
