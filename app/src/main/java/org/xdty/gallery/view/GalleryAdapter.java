@@ -15,6 +15,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.xdty.gallery.R;
 import org.xdty.gallery.model.Media;
+import org.xdty.gallery.model.media.LocalMedia;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,11 +98,17 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
             name.setText(mediaFile.getName());
 
+            DiskCacheStrategy strategy = DiskCacheStrategy.ALL;
+
+            if (mediaFile instanceof LocalMedia) {
+                strategy = DiskCacheStrategy.RESULT;
+            }
+
             if (mediaFile.isImage()) {
                 mRequestManager.load(mediaFile)
                         .asBitmap()
                         .format(DecodeFormat.PREFER_RGB_565)
-                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        .diskCacheStrategy(strategy)
                         .placeholder(R.color.gray_overlay)
                         .fitCenter().centerCrop().into(thumbnail);
                 name.setVisibility(View.GONE);
@@ -109,7 +116,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
                 mRequestManager.load(mediaFile)
                         .asBitmap()
                         .format(DecodeFormat.PREFER_RGB_565)
-                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        .diskCacheStrategy(strategy)
                         .placeholder(R.drawable.folder)
                         .error(R.drawable.folder)
                         .dontAnimate()
