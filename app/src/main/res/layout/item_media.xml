@@ -6,7 +6,6 @@
 
     <org.xdty.gallery.view.SquareImageView
         android:id="@+id/thumbnail"
-        style="@style/item_transition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:contentDescription="@string/thumbnail"

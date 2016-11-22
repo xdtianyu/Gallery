@@ -20,6 +20,10 @@ public class MediaRepository implements MediaDataSource {
 
     private Media mCurrent;
 
+    private int mMediaPosition;
+
+    private int mFilePosition;
+
     public MediaRepository() {
         mMediaCache = MediaCache.getInstance();
     }
@@ -172,5 +176,25 @@ public class MediaRepository implements MediaDataSource {
         mCurrent = null;
         mRoots.clear();
         mSupportMedias.clear();
+    }
+
+    @Override
+    public void setMediaPosition(int position) {
+        mMediaPosition = position;
+    }
+
+    @Override
+    public int getMediaPosition() {
+        return mMediaPosition;
+    }
+
+    @Override
+    public void setFilePosition(int position) {
+        mFilePosition = position;
+    }
+
+    @Override
+    public int getFilePosition() {
+        return mFilePosition;
     }
 }

@@ -9,6 +9,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.SharedElementCallback;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -31,6 +34,7 @@ import org.xdty.gallery.view.PagerAdapter;
 import org.xdty.gallery.view.ViewPager;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -53,8 +57,20 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     private TouchEventListener mTouchEventListener;
 
+    private SharedElementCallback enterTransitionCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+            String name = mPresenter.getCurrentName();
+            sharedElements.put(name, getCurrentView(name));
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+
+        ActivityCompat.postponeEnterTransition(this);
+        ActivityCompat.setEnterSharedElementCallback(this, enterTransitionCallback);
+
         super.onCreate(savedInstanceState);
 
         DaggerViewerComponent.builder()
@@ -108,6 +124,11 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public void setTitle(String name) {
         super.setTitle(name);
+    }
+
+    @Override
+    public void startTransition() {
+        ActivityCompat.startPostponedEnterTransition(this);
     }
 
     @Override
@@ -225,6 +246,7 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         Intent intent = new Intent();
         intent.putExtra(Constants.POSITION, mPresenter.getPosition());
         setResult(RESULT_OK, intent);
+        supportFinishAfterTransition();
         super.onBackPressed();
     }
 
@@ -293,6 +315,15 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     public void setPagingEnabled(boolean enabled) {
         mViewPager.setPagingEnabled(enabled);
+    }
+
+    private View getCurrentView(String name) {
+        for (int i = 0; i < mViewPager.getChildCount(); i++) {
+            if (name.equals(ViewCompat.getTransitionName(mViewPager.getChildAt(i)))) {
+                return mViewPager.getChildAt(i);
+            }
+        }
+        return null;
     }
 
     public void setTouchEventListener(TouchEventListener listener) {

@@ -24,6 +24,8 @@ public interface ViewerContact {
         void load(Media media);
 
         void setTitle(String name);
+
+        void startTransition();
     }
 
     interface Presenter extends BasePresenter {
@@ -32,8 +34,12 @@ public interface ViewerContact {
 
         void pageSelected(int position);
 
+        int getSelectedPosition();
+
         int getPosition();
 
         void clear();
+
+        String getCurrentName();
     }
 }

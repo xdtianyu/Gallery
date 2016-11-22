@@ -1,6 +1,7 @@
 package org.xdty.gallery.view;
 
 import android.app.Activity;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
@@ -112,6 +113,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
                         .placeholder(R.color.gray_overlay)
                         .fitCenter().centerCrop().into(thumbnail);
                 name.setVisibility(View.GONE);
+                ViewCompat.setTransitionName(thumbnail, mediaFile.getName());
             } else {
                 mRequestManager.load(mediaFile)
                         .asBitmap()
@@ -122,6 +124,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
                         .dontAnimate()
                         .fitCenter().centerCrop().into(thumbnail);
                 name.setVisibility(View.VISIBLE);
+                ViewCompat.setTransitionName(thumbnail, null);
             }
         }
 

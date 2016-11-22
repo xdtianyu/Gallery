@@ -19,8 +19,6 @@ public class ViewerPresenter implements ViewerContact.Presenter {
 
     private ViewerContact.View mView;
 
-    private int mSelectedPosition = -1;
-
     private List<Media> mMedias = new ArrayList<>();
     private List<Media> mFiles = new ArrayList<>();
 
@@ -61,12 +59,13 @@ public class ViewerPresenter implements ViewerContact.Presenter {
                 mMedias.clear();
                 mMedias.addAll(medias);
                 if (mFiles.size() > position) {
-                    mSelectedPosition = mMedias.indexOf(mFiles.get(position));
+                    mDataSource.setMediaPosition(mMedias.indexOf(mFiles.get(position)));
                 } else {
-                    mSelectedPosition = position;
+                    mDataSource.setMediaPosition(position);
                 }
-                mView.replaceData(mMedias, mSelectedPosition);
-                mView.setTitle(mMedias.get(mSelectedPosition).getName());
+                mView.replaceData(mMedias, mDataSource.getMediaPosition());
+                mView.setTitle(mMedias.get(mDataSource.getMediaPosition()).getName());
+                mView.startTransition();
             }
         });
     }
@@ -75,17 +74,29 @@ public class ViewerPresenter implements ViewerContact.Presenter {
     public void pageSelected(int position) {
         Media media = mMedias.get(position);
         mView.setTitle(media.getName());
-        mSelectedPosition = position;
+        mDataSource.setMediaPosition(position);
+    }
+
+    @Override
+    public int getSelectedPosition() {
+        return mDataSource.getMediaPosition();
     }
 
     @Override
     public int getPosition() {
-        return mFiles.indexOf(mMedias.get(mSelectedPosition));
+        int position = mFiles.indexOf(mMedias.get(mDataSource.getMediaPosition()));
+        mDataSource.setFilePosition(position);
+        return position;
     }
 
     @Override
     public void clear() {
         mFiles.clear();
         mMedias.clear();
+    }
+
+    @Override
+    public String getCurrentName() {
+        return mMedias.get(mDataSource.getMediaPosition()).getName();
     }
 }

@@ -5,7 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.SharedElementCallback;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +36,7 @@ import org.xdty.gallery.utils.Utils;
 import org.xdty.gallery.view.GalleryAdapter;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -44,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
 
     @Inject
     MainContact.Presenter mMainPresenter;
-
     @Inject
     RequestManager mGlideRequest;
 
@@ -54,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
     private FloatingActionButton mFab;
     private GalleryAdapter mGalleryAdapter;
     private GridLayoutManager mGridLayoutManager;
-
     private Runnable mRefreshDelayedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -63,9 +65,23 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
         }
     };
 
+    private SharedElementCallback exitTransitionCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+            int position = mMainPresenter.getPosition();
+            View view = mRecyclerView.findViewHolderForAdapterPosition(position).itemView;
+            if (view != null) {
+                View thumbnail = view.findViewById(R.id.thumbnail);
+                sharedElements.put(ViewCompat.getTransitionName(thumbnail), thumbnail);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ActivityCompat.setExitSharedElementCallback(this, exitTransitionCallback);
 
         DaggerMainComponent.builder()
                 .appModule(new AppModule((Application) getApplication()))
@@ -180,9 +196,8 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
         View thumbnail = mRecyclerView.findViewHolderForAdapterPosition(
                 position).itemView.findViewById(R.id.thumbnail);
 
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeScaleUpAnimation(
-                thumbnail, (int) thumbnail.getX(), (int) thumbnail.getY(), thumbnail.getWidth(),
-                thumbnail.getHeight());
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                thumbnail, media.getName());
 
         startActivityForResult(intent, REQUEST_POSITION, options.toBundle());
     }

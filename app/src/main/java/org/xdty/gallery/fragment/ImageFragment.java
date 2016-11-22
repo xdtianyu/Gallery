@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -245,12 +246,16 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
         mUri = getArguments().getString(URI);
 
+        Media media = mDataSource.getMedia(mUri);
+
+        ViewCompat.setTransitionName(mPhotoView, media.getName());
+
         if (mUri != null && mUri.toLowerCase().endsWith("gif")) {
-            mGifRequestBuilder.load(mDataSource.getMedia(mUri))
+            mGifRequestBuilder.load(media)
                     .listener(new MediaRequestListener<Media, GifDrawable>())
                     .into(mPhotoView);
         } else {
-            mRequestManager.load(mDataSource.getMedia(mUri))
+            mRequestManager.load(media)
                     .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .listener(new MediaRequestListener<Media, GlideDrawable>())
                     .into(mPhotoView);

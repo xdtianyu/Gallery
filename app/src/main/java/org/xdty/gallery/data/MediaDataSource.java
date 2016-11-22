@@ -29,4 +29,12 @@ public interface MediaDataSource {
     Observable<List<Media>> loadMediaList(Media media);
 
     void clearCache();
+
+    void setMediaPosition(int position);
+
+    int getMediaPosition();
+
+    void setFilePosition(int position);
+
+    int getFilePosition();
 }

@@ -103,6 +103,7 @@ public class MainPresenter implements MainContact.Presenter {
         }
 
         if (media.isImage()) {
+            mMediaDataSource.setFilePosition(position);
             mView.startViewer(position, media);
         } else {
             loadChild(firstPosition, media);
@@ -141,6 +142,11 @@ public class MainPresenter implements MainContact.Presenter {
     public void clear() {
         mMediaDataSource.clearCache();
         mMediaFileList.clear();
+    }
+
+    @Override
+    public int getPosition() {
+        return mMediaDataSource.getFilePosition();
     }
 
     private void loadRootDir() {

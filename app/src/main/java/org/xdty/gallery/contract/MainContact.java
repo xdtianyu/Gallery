@@ -29,5 +29,7 @@ public interface MainContact {
         boolean loadParent(int firstVisibleItemPosition);
 
         void clear();
+
+        int getPosition();
     }
 }
