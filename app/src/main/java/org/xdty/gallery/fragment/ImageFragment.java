@@ -89,6 +89,16 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
             }
         }
     };
+
+    private Runnable mUpdateTransitionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mPhotoView != null) {
+                ViewCompat.setTransitionName(mPhotoView, isVisibleToUser ? mName : null);
+            }
+        }
+    };
+
     private DraggableRelativeLayout.DragListener mDragListener =
             new DraggableRelativeLayout.DragListener() {
                 final float threshold = 0.85f;
@@ -207,15 +217,13 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
         mHandler.removeCallbacks(mUpdateGifRunnable);
         mHandler.postDelayed(mUpdateGifRunnable, 10);
 
-        setTransition();
+        updateTransition();
 
     }
 
-    private void setTransition() {
-
-        if (mPhotoView != null) {
-            ViewCompat.setTransitionName(mPhotoView, isVisibleToUser ? mName : null);
-        }
+    private void updateTransition() {
+        mHandler.removeCallbacks(mUpdateTransitionRunnable);
+        mHandler.postDelayed(mUpdateTransitionRunnable, 10);
     }
 
     private void updateOrientation() {
@@ -261,6 +269,8 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
         mName = media.getName();
 
         ViewCompat.setTransitionName(mPhotoView, mName);
+
+        updateTransition();
 
         if (mUri != null && mUri.toLowerCase().endsWith("gif")) {
             mGifRequestBuilder.load(media)
