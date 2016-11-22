@@ -10,7 +10,6 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -34,7 +33,6 @@ import org.xdty.gallery.view.PagerAdapter;
 import org.xdty.gallery.view.ViewPager;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -57,19 +55,10 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
 
     private TouchEventListener mTouchEventListener;
 
-    private SharedElementCallback enterTransitionCallback = new SharedElementCallback() {
-        @Override
-        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-            String name = mPresenter.getCurrentName();
-            sharedElements.put(name, getCurrentView(name));
-        }
-    };
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         ActivityCompat.postponeEnterTransition(this);
-        ActivityCompat.setEnterSharedElementCallback(this, enterTransitionCallback);
 
         super.onCreate(savedInstanceState);
 
@@ -246,7 +235,6 @@ public class ViewerActivity extends AppCompatActivity implements ViewPager.OnPag
         Intent intent = new Intent();
         intent.putExtra(Constants.POSITION, mPresenter.getPosition());
         setResult(RESULT_OK, intent);
-        supportFinishAfterTransition();
         super.onBackPressed();
     }
 

@@ -60,6 +60,7 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
     private PhotoView mPhotoView;
 
     private String mUri;
+    private String mName;
 
     private Handler mHandler;
 
@@ -206,6 +207,15 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
         mHandler.removeCallbacks(mUpdateGifRunnable);
         mHandler.postDelayed(mUpdateGifRunnable, 10);
 
+        setTransition();
+
+    }
+
+    private void setTransition() {
+
+        if (mPhotoView != null) {
+            ViewCompat.setTransitionName(mPhotoView, isVisibleToUser ? mName : null);
+        }
     }
 
     private void updateOrientation() {
@@ -248,7 +258,9 @@ public class ImageFragment extends Fragment implements ViewerActivity.TouchEvent
 
         Media media = mDataSource.getMedia(mUri);
 
-        ViewCompat.setTransitionName(mPhotoView, media.getName());
+        mName = media.getName();
+
+        ViewCompat.setTransitionName(mPhotoView, mName);
 
         if (mUri != null && mUri.toLowerCase().endsWith("gif")) {
             mGifRequestBuilder.load(media)

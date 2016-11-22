@@ -5,9 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.SharedElementCallback;
+import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -35,8 +34,8 @@ import org.xdty.gallery.utils.Constants;
 import org.xdty.gallery.utils.Utils;
 import org.xdty.gallery.view.GalleryAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -65,23 +64,9 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
         }
     };
 
-    private SharedElementCallback exitTransitionCallback = new SharedElementCallback() {
-        @Override
-        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-            int position = mMainPresenter.getPosition();
-            View view = mRecyclerView.findViewHolderForAdapterPosition(position).itemView;
-            if (view != null) {
-                View thumbnail = view.findViewById(R.id.thumbnail);
-                sharedElements.put(ViewCompat.getTransitionName(thumbnail), thumbnail);
-            }
-        }
-    };
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ActivityCompat.setExitSharedElementCallback(this, exitTransitionCallback);
 
         DaggerMainComponent.builder()
                 .appModule(new AppModule((Application) getApplication()))
@@ -193,11 +178,25 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
         intent.putExtra(Constants.HOST, media.getHost());
         intent.putExtra(Constants.POSITION, position);
 
-        View thumbnail = mRecyclerView.findViewHolderForAdapterPosition(
-                position).itemView.findViewById(R.id.thumbnail);
+        int first = mGridLayoutManager.findFirstVisibleItemPosition();
+        int last = mGridLayoutManager.findLastVisibleItemPosition();
 
+        List<Pair<View, String>> views = new ArrayList<>();
+
+        for (int i = first; i <= last; i++) {
+            View thumbnail = mRecyclerView.findViewHolderForAdapterPosition(
+                    i).itemView.findViewById(R.id.thumbnail);
+            String name = ViewCompat.getTransitionName(thumbnail);
+            if (name != null) {
+                views.add(new Pair<>(thumbnail, name));
+            }
+        }
+        Pair<?, ?>[] paris = new Pair<?, ?>[views.size()];
+        views.toArray(paris);
+
+        @SuppressWarnings("unchecked")
         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
-                thumbnail, media.getName());
+                (Pair<View, String>[]) paris);
 
         startActivityForResult(intent, REQUEST_POSITION, options.toBundle());
     }

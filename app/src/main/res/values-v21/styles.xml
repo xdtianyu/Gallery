@@ -5,12 +5,6 @@
         <item name="windowNoTitle">true</item>
         <!--<item name="android:windowDrawsSystemBarBackgrounds">false</item>-->
         <!--<item name="android:statusBarColor">@android:color/transparent</item>-->
-
-
-        <item name="android:windowSharedElementEnterTransition">@transition/change_image</item>
-        <item name="android:windowSharedElementExitTransition">@transition/change_image</item>
-        <item name="android:windowEnterTransition">@transition/fade_no_flash</item>
-        <item name="android:windowExitTransition">@transition/fade_no_flash</item>
     </style>
 
     <style name="FullscreenTheme" parent="Theme.AppCompat.NoActionBar">
@@ -25,10 +19,5 @@
 
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
-
-        <item name="android:windowSharedElementEnterTransition">@transition/change_image</item>
-        <item name="android:windowSharedElementExitTransition">@transition/change_image</item>
-        <item name="android:windowEnterTransition">@transition/fade_no_flash</item>
-        <item name="android:windowExitTransition">@transition/fade_no_flash</item>
     </style>
 </resources>
