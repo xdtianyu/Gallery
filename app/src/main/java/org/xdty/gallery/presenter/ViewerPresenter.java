@@ -40,15 +40,21 @@ public class ViewerPresenter implements ViewerContact.Presenter {
         Media media = mDataSource.getMedia(uri);
         mView.load(media);
 
-        Media parent = mDataSource.getMedia(parentUri);
+        final Media parent = mDataSource.getMedia(parentUri);
 
         mDataSource.loadDir(parent, false).subscribe(new Action1<List<Media>>() {
             @Override
             public void call(List<Media> medias) {
+                mFiles.clear();
                 mFiles.addAll(medias);
+
+                loadMediaList(parent, position);
             }
         });
 
+    }
+
+    private void loadMediaList(Media parent, final int position) {
         mDataSource.loadMediaList(parent).subscribe(new Action1<List<Media>>() {
             @Override
             public void call(List<Media> medias) {
@@ -79,6 +85,7 @@ public class ViewerPresenter implements ViewerContact.Presenter {
 
     @Override
     public void clear() {
+        mFiles.clear();
         mMedias.clear();
     }
 }
