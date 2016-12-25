@@ -3,6 +3,9 @@ package org.xdty.gallery.application;
 import android.os.StrictMode;
 
 import com.facebook.stetho.Stetho;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
+import org.xdty.gallery.utils.OkHttp;
 
 import rx.Observable;
 import rx.functions.Action1;
@@ -37,6 +40,9 @@ public class DebugApplication extends Application {
                                 .build());
             }
         });
+
+        OkHttp.getInstance().addNetworkInterceptor(new StethoInterceptor());
+
         super.onCreate();
     }
 }
