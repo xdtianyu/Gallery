@@ -20,20 +20,20 @@ before_install:
 
 script:
   - ./gradlew clean assembleDebug
-  - cp app/build/outputs/apk/Gallery-v$GIT_TAG-debug.apk $HOME
+  - cp app/build/outputs/apk/Gallery-$GIT_TAG-debug.apk $HOME
   - ./gradlew clean assembleRelease
-  - cp app/build/outputs/apk/Gallery-v$GIT_TAG-release.apk $HOME
-  - md5sum "$HOME/Gallery-v$GIT_TAG-debug.apk"
-  - md5sum "$HOME/Gallery-v$GIT_TAG-release.apk"
-  - sha1sum "$HOME/Gallery-v$GIT_TAG-debug.apk"
-  - sha1sum "$HOME/Gallery-v$GIT_TAG-release.apk"
+  - cp app/build/outputs/apk/Gallery-$GIT_TAG-release.apk $HOME
+  - md5sum "$HOME/Gallery-$GIT_TAG-debug.apk"
+  - md5sum "$HOME/Gallery-$GIT_TAG-release.apk"
+  - sha1sum "$HOME/Gallery-$GIT_TAG-debug.apk"
+  - sha1sum "$HOME/Gallery-$GIT_TAG-release.apk"
 
 deploy:
   provider: releases
   api-key: $GITHUB_TOKEN
   file:
-    - "$HOME/Gallery-v$GIT_TAG-debug.apk"
-    - "$HOME/Gallery-v$GIT_TAG-release.apk"
+    - "$HOME/Gallery-$GIT_TAG-debug.apk"
+    - "$HOME/Gallery-$GIT_TAG-release.apk"
   skip_cleanup: true
   on:
     tags: true
