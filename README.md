@@ -2,6 +2,7 @@
 An extensible android gallery that supports samba/windows share, http/https/webdav, etc. (WIP)
 
 [![Build Status](https://travis-ci.org/xdtianyu/Gallery.svg?branch=master)](https://travis-ci.org/xdtianyu/Gallery)
+[![Build Status](https://img.shields.io/jenkins/s/https/jenkins.xdty.org/gallery.svg?label=jenkins)](https://jenkins.xdty.org/job/Gallery/buildTimeTrend)
 [![Coverage Status](https://coveralls.io/repos/github/xdtianyu/Gallery/badge.svg?branch=master)](https://coveralls.io/github/xdtianyu/Gallery?branch=master)
 
 ##Thanks to

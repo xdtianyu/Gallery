@@ -9,8 +9,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode project.VERSION_CODE.toInteger()
-        versionName project.VERSION_NAME
+        versionCode 1
+        versionName "1.0"
 
     }
 }

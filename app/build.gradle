@@ -1,6 +1,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
 
+def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+def gitTag = 'git describe --abbrev=0 --tags'
+        .execute([], project.rootDir).text.trim().replaceAll("v", "")
+def gitTagCount = Integer.parseInt('git rev-list --tags --no-walk --count'
+        .execute([], project.rootDir).text.trim())
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -11,8 +17,10 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode project.VERSION_CODE.toInteger()
-        versionName project.VERSION_NAME
+        versionCode gitTagCount
+        versionName gitTag
+
+        buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
         setProperty("archivesBaseName", "Gallery-v$versionName")
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -75,7 +83,7 @@ dependencies {
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
     androidTestCompile 'com.android.support.test.espresso:espresso-intents:2.2.2'
     androidTestCompile 'com.android.support.test.espresso:espresso-idling-resource:2.2.2'
-    androidTestCompile ('com.android.support.test.espresso:espresso-contrib:2.2.2') {
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2.2') {
         exclude group: 'com.android.support', module: 'appcompat-v7'
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'design'
@@ -84,8 +92,8 @@ dependencies {
 
     compile "com.android.support:appcompat-v7:${rootProject.ext.supportVersion}"
     compile "com.android.support:design:${rootProject.ext.supportVersion}"
-//    apt "org.androidannotations:androidannotations:${rootProject.ext.aaVersion}"
-//    compile "org.androidannotations:androidannotations-api:${rootProject.ext.aaVersion}"
+    //    apt "org.androidannotations:androidannotations:${rootProject.ext.aaVersion}"
+    //    compile "org.androidannotations:androidannotations-api:${rootProject.ext.aaVersion}"
     compile "org.samba.jcifs:jcifs:1.3.17"
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.3'
@@ -108,7 +116,7 @@ dependencies {
 
     compile 'org.xdty.webdav:webdav:0.1.9'
 
-//    compile(name:'webdav-debug', ext:'aar')
+    //    compile(name:'webdav-debug', ext:'aar')
 
     compile 'com.jenzz:materialpreference:1.3'
     compile 'cat.ereza:customactivityoncrash:1.4.0'

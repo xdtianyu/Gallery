@@ -105,6 +105,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<ViewHolder> {
                 strategy = DiskCacheStrategy.RESULT;
             }
 
+            Glide.clear(thumbnail);
+
             if (mediaFile.isImage()) {
                 mRequestManager.load(mediaFile)
                         .asBitmap()

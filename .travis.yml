@@ -15,25 +15,25 @@ notifications:
 
 before_install:
    - touch local.properties
-   - source gradle.properties
+   - source .travis/env.sh
    - openssl aes-256-cbc -K $encrypted_151cd4732554_key -iv $encrypted_151cd4732554_iv -in release.jks.enc -out release.jks -d
 
 script:
   - ./gradlew clean assembleDebug
-  - cp app/build/outputs/apk/Gallery-v$VERSION_NAME-debug.apk $HOME
+  - cp app/build/outputs/apk/Gallery-v$GIT_TAG-debug.apk $HOME
   - ./gradlew clean assembleRelease
-  - cp app/build/outputs/apk/Gallery-v$VERSION_NAME-release.apk $HOME
-  - md5sum "$HOME/Gallery-v$VERSION_NAME-debug.apk"
-  - md5sum "$HOME/Gallery-v$VERSION_NAME-release.apk"
-  - sha1sum "$HOME/Gallery-v$VERSION_NAME-debug.apk"
-  - sha1sum "$HOME/Gallery-v$VERSION_NAME-release.apk"
+  - cp app/build/outputs/apk/Gallery-v$GIT_TAG-release.apk $HOME
+  - md5sum "$HOME/Gallery-v$GIT_TAG-debug.apk"
+  - md5sum "$HOME/Gallery-v$GIT_TAG-release.apk"
+  - sha1sum "$HOME/Gallery-v$GIT_TAG-debug.apk"
+  - sha1sum "$HOME/Gallery-v$GIT_TAG-release.apk"
 
 deploy:
   provider: releases
   api-key: $GITHUB_TOKEN
   file:
-    - "$HOME/Gallery-v$VERSION_NAME-debug.apk"
-    - "$HOME/Gallery-v$VERSION_NAME-release.apk"
+    - "$HOME/Gallery-v$GIT_TAG-debug.apk"
+    - "$HOME/Gallery-v$GIT_TAG-release.apk"
   skip_cleanup: true
   on:
     tags: true
