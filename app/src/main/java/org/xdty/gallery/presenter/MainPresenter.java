@@ -60,8 +60,13 @@ public class MainPresenter implements MainContact.Presenter {
                 @Override
                 public void call(List<Server> servers) {
                     for (Server server : servers) {
-                        mMediaDataSource.addRoot(server.getUri(), server.getUsername(),
-                                server.getPassword());
+                        try {
+                            mMediaDataSource.addRoot(server.getUri(), server.getUsername(),
+                                    server.getPassword());
+                        } catch (Media.MediaException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                     loadRootDir();
                 }
