@@ -3,7 +3,7 @@ package org.xdty.gallery.activity;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.xdty.gallery.BuildConfig;
 import org.xdty.gallery.R;

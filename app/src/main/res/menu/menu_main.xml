@@ -3,6 +3,11 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="org.xdty.gallery.activity.MainActivity">
     <item
+        android:id="@+id/data_source"
+        android:orderInCategory="100"
+        android:title="@string/data_source"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"

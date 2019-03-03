@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -17,7 +17,7 @@
         android:background="@color/black_overlay"
         android:visibility="invisible"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark">
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
     <!--<android.support.design.widget.FloatingActionButton-->
     <!--android:id="@+id/fab"-->

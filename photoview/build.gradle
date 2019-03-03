@@ -15,5 +15,5 @@ android {
 }
 
 dependencies {
-    implementation "com.android.support:support-core-utils:${rootProject.ext.supportVersion}"
+    implementation "androidx.legacy:legacy-support-core-utils:${rootProject.ext.supportVersion}"
 }

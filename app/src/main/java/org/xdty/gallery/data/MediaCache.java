@@ -1,6 +1,6 @@
 package org.xdty.gallery.data;
 
-import android.support.v4.util.LruCache;
+import androidx.collection.LruCache;
 
 import org.xdty.gallery.model.Media;
 

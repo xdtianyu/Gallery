@@ -1,6 +1,6 @@
 package org.xdty.gallery.model.media;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.xdty.autoindex.AutoIndexFile;
 import org.xdty.gallery.model.Media;
@@ -14,7 +14,7 @@ import java.util.List;
 public class AutoIndexMedia extends AutoIndexFile
         implements Media<AutoIndexMedia>, Comparable<AutoIndexMedia> {
 
-    private final static String[] SCHEME = new String[] { "index", "indexs" };
+    private final static String[] SCHEME = new String[] { "http", "https" };
 
     private AutoIndexMedia parent;
     private List<AutoIndexMedia> children = new ArrayList<>();

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.xdty.gallery">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -7,12 +8,18 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:name="org.xdty.gallery.application.Application"
-        android:allowBackup="true"
+        android:name=".application.Application"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        <activity
+            android:name=".activity.DataSourceActivity"
+            android:label="@string/data_source"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
         <meta-data
             android:name="org.xdty.gallery.glide.GlideSetup"
             android:value="GlideModule"/>
@@ -24,10 +31,10 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activity.ViewerActivity"
             android:configChanges="orientation|screenSize"
@@ -43,6 +50,7 @@
             android:label="@string/license">
             <intent-filter>
                 <action android:name="org.xdty.gallery.action.VIEW_LICENSES"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>

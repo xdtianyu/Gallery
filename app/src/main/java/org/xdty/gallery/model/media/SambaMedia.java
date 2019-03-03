@@ -1,6 +1,6 @@
 package org.xdty.gallery.model.media;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.xdty.gallery.model.Media;
 
