@@ -39,4 +39,5 @@
     <string name="add_server_help">Help</string>
     <string name="transition_thumbnail" translatable="false">transition:THUMBNAIL</string>
     <string name="data_source">Data source</string>
+    <string name="server">Server</string>
 </resources>

@@ -3,25 +3,26 @@ package org.xdty.gallery.activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.util.Pair;
-import androidx.core.view.ViewCompat;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.util.Pair;
+import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.xdty.gallery.R;
 import org.xdty.gallery.application.Application;
@@ -184,8 +185,7 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
         List<Pair<View, String>> views = new ArrayList<>();
 
         for (int i = first; i <= last; i++) {
-            View thumbnail = mRecyclerView.findViewHolderForAdapterPosition(
-                    i).itemView.findViewById(R.id.thumbnail);
+            View thumbnail = mRecyclerView.findViewHolderForAdapterPosition(i).itemView.findViewById(R.id.thumbnail);
             String name = ViewCompat.getTransitionName(thumbnail);
             if (name != null) {
                 views.add(new Pair<>(thumbnail, name));
@@ -262,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements MainContact.View,
                 scrollToPosition(position);
                 break;
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
