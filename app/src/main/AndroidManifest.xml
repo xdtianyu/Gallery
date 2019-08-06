@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.xdty.gallery">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".application.Application"
@@ -13,16 +13,17 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        android:usesCleartextTraffic="true"
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning"
+        tools:targetApi="m">
         <activity
             android:name=".activity.DataSourceActivity"
             android:label="@string/data_source"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
             android:name="org.xdty.gallery.glide.GlideSetup"
-            android:value="GlideModule"/>
+            android:value="GlideModule" />
 
         <activity
             android:name=".activity.MainActivity"
@@ -30,28 +31,26 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".activity.ViewerActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_viewer"
-            android:theme="@style/FullscreenTheme">
-        </activity>
+            android:theme="@style/FullscreenTheme" />
         <activity
             android:name=".activity.SettingsActivity"
-            android:label="@string/action_settings">
-        </activity>
+            android:label="@string/action_settings" />
         <activity
             android:name=".activity.LicensesActivity"
             android:label="@string/license">
             <intent-filter>
-                <action android:name="org.xdty.gallery.action.VIEW_LICENSES"/>
+                <action android:name="org.xdty.gallery.action.VIEW_LICENSES" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>
