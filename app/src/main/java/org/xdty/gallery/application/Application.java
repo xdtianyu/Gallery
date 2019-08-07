@@ -9,6 +9,7 @@ import org.xdty.gallery.setting.Setting;
 import javax.inject.Inject;
 
 import cat.ereza.customactivityoncrash.CustomActivityOnCrash;
+import io.reactivex.plugins.RxJavaPlugins;
 
 public class Application extends android.app.Application {
 
@@ -31,6 +32,8 @@ public class Application extends android.app.Application {
         if (BuildConfig.DEBUG || mSetting.isCatchCrashEnable()) {
             CustomActivityOnCrash.install(this);
         }
+
+        RxJavaPlugins.setErrorHandler(Throwable::printStackTrace);
     }
 
 }

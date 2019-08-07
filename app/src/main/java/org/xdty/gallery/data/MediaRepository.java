@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class MediaRepository implements MediaDataSource {
 
@@ -123,50 +123,41 @@ public class MediaRepository implements MediaDataSource {
 
     @Override
     public Observable<List<Media>> loadDir(final Media media, final boolean isRefresh) {
-        return Observable.create(new Observable.OnSubscribe<List<Media>>() {
-
-            @Override
-            public void call(Subscriber<? super List<Media>> subscriber) {
-                if (isRefresh) {
-                    media.clear();
-                }
-
-                List<Media> children = media.children();
-
-                MediaCache.getInstance().put(children);
-
-                List<Media> list = new ArrayList<>();
-
-                for (Media m : children) {
-                    if (m.isImage() || m.isDirectory()) {
-                        list.add(m);
-                    }
-                }
-                subscriber.onNext(list);
+        return Observable.create((ObservableOnSubscribe<List<Media>>) emitter -> {
+            if (isRefresh) {
+                media.clear();
             }
+            List<Media> children = media.children();
+
+            MediaCache.getInstance().put(children);
+
+            List<Media> list = new ArrayList<>();
+
+            for (Media m : children) {
+                if (m.isImage() || m.isDirectory()) {
+                    list.add(m);
+                }
+            }
+            emitter.onNext(list);
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
     public Observable<List<Media>> loadMediaList(final Media media) {
-        return Observable.create(new Observable.OnSubscribe<List<Media>>() {
+        return Observable.create((ObservableOnSubscribe<List<Media>>) emitter -> {
 
-            @Override
-            public void call(Subscriber<? super List<Media>> subscriber) {
+            List<Media> children = media.children();
 
-                List<Media> children = media.children();
+            MediaCache.getInstance().put(children);
 
-                MediaCache.getInstance().put(children);
+            List<Media> list = new ArrayList<>();
 
-                List<Media> list = new ArrayList<>();
-
-                for (Media m : children) {
-                    if (m.isImage()) {
-                        list.add(m);
-                    }
+            for (Media m : children) {
+                if (m.isImage()) {
+                    list.add(m);
                 }
-                subscriber.onNext(list);
             }
+            emitter.onNext(list);
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import rx.functions.Action1;
+import io.reactivex.disposables.CompositeDisposable;
 
 public class ViewerPresenter implements ViewerContact.Presenter {
 
@@ -18,6 +18,8 @@ public class ViewerPresenter implements ViewerContact.Presenter {
     MediaDataSource mDataSource;
 
     private ViewerContact.View mView;
+
+    private CompositeDisposable mSubscriptions = new CompositeDisposable();
 
     private List<Media> mMedias = new ArrayList<>();
     private List<Media> mFiles = new ArrayList<>();
@@ -40,34 +42,28 @@ public class ViewerPresenter implements ViewerContact.Presenter {
 
         final Media parent = mDataSource.getMedia(parentUri);
 
-        mDataSource.loadDir(parent, false).subscribe(new Action1<List<Media>>() {
-            @Override
-            public void call(List<Media> medias) {
-                mFiles.clear();
-                mFiles.addAll(medias);
+        mSubscriptions.add(mDataSource.loadDir(parent, false).subscribe(medias -> {
+            mFiles.clear();
+            mFiles.addAll(medias);
 
-                loadMediaList(parent, position);
-            }
-        });
+            loadMediaList(parent, position);
+        }));
 
     }
 
     private void loadMediaList(Media parent, final int position) {
-        mDataSource.loadMediaList(parent).subscribe(new Action1<List<Media>>() {
-            @Override
-            public void call(List<Media> medias) {
-                mMedias.clear();
-                mMedias.addAll(medias);
-                if (mFiles.size() > position) {
-                    mDataSource.setMediaPosition(mMedias.indexOf(mFiles.get(position)));
-                } else {
-                    mDataSource.setMediaPosition(position);
-                }
-                mView.replaceData(mMedias, mDataSource.getMediaPosition());
-                mView.setTitle(mMedias.get(mDataSource.getMediaPosition()).getName());
-                mView.startTransition();
+        mSubscriptions.add(mDataSource.loadMediaList(parent).subscribe(medias -> {
+            mMedias.clear();
+            mMedias.addAll(medias);
+            if (mFiles.size() > position) {
+                mDataSource.setMediaPosition(mMedias.indexOf(mFiles.get(position)));
+            } else {
+                mDataSource.setMediaPosition(position);
             }
-        });
+            mView.replaceData(mMedias, mDataSource.getMediaPosition());
+            mView.setTitle(mMedias.get(mDataSource.getMediaPosition()).getName());
+            mView.startTransition();
+        }));
     }
 
     @Override
@@ -91,6 +87,7 @@ public class ViewerPresenter implements ViewerContact.Presenter {
 
     @Override
     public void clear() {
+        mSubscriptions.dispose();
         mFiles.clear();
         mMedias.clear();
     }

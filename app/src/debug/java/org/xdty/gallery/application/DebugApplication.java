@@ -7,9 +7,7 @@ import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import org.xdty.gallery.utils.OkHttp;
 
-import rx.Observable;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Completable;
 
 public class DebugApplication extends Application {
     private final static String TAG = DebugApplication.class.getSimpleName();
@@ -28,18 +26,14 @@ public class DebugApplication extends Application {
                 //.penaltyDeath()
                 .build());
 
-        Observable.<Void>just(null).observeOn(Schedulers.io()).subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                Stetho.initialize(
-                        Stetho.newInitializerBuilder(DebugApplication.this)
-                                .enableDumpapp(
-                                        Stetho.defaultDumperPluginsProvider(DebugApplication.this))
-                                .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(
-                                        DebugApplication.this))
-                                .build());
-            }
-        });
+        Completable.fromRunnable(() ->
+                Stetho.initialize(Stetho.newInitializerBuilder(DebugApplication.this)
+                        .enableDumpapp(
+                                Stetho.defaultDumperPluginsProvider(DebugApplication.this))
+                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(
+                                DebugApplication.this))
+                        .build())
+        ).subscribe();
 
         OkHttp.getInstance().addNetworkInterceptor(new StethoInterceptor());
 

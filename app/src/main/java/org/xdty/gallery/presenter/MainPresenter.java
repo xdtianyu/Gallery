@@ -19,7 +19,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import rx.functions.Action1;
+import io.reactivex.disposables.CompositeDisposable;
 
 public class MainPresenter implements MainContact.Presenter {
 
@@ -34,6 +34,8 @@ public class MainPresenter implements MainContact.Presenter {
 
     @Inject
     Database mDatabase;
+
+    private CompositeDisposable mSubscriptions = new CompositeDisposable();
 
     boolean isRoot = false;
     private MainContact.View mView;
@@ -56,21 +58,18 @@ public class MainPresenter implements MainContact.Presenter {
 
             mMediaDataSource.addRoot(mSetting.getLocalPath(), null, null);
 
-            mDatabase.getServers().subscribe(new Action1<List<Server>>() {
-                @Override
-                public void call(List<Server> servers) {
-                    for (Server server : servers) {
-                        try {
-                            mMediaDataSource.addRoot(server.getUri(), server.getUsername(),
-                                    server.getPassword());
-                        } catch (Media.MediaException e) {
-                            e.printStackTrace();
-                        }
-
+            mSubscriptions.add(mDatabase.getServers().subscribe(servers -> {
+                for (Server server : servers) {
+                    try {
+                        mMediaDataSource.addRoot(server.getUri(), server.getUsername(),
+                                server.getPassword());
+                    } catch (Media.MediaException e) {
+                        e.printStackTrace();
                     }
-                    loadRootDir();
+
                 }
-            });
+                loadRootDir();
+            }));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -175,19 +174,17 @@ public class MainPresenter implements MainContact.Presenter {
     }
 
     private void loadDir(final Media media, final boolean isRefresh) {
-        mMediaDataSource.loadDir(media, isRefresh).subscribe(new Action1<List<Media>>() {
-            @Override
-            public void call(List<Media> medias) {
-                mView.replaceData(medias);
+        mSubscriptions.add(mMediaDataSource.loadDir(media, isRefresh).subscribe(medias -> {
 
-                isRoot = false;
-                mMediaDataSource.setCurrent(media);
+            mView.replaceData(medias);
 
-                mView.setTitle(media.getName());
-                mView.scrollToPosition(media.getPosition());
-                mView.showLoading(false);
-                isLoading = false;
-            }
-        });
+            isRoot = false;
+            mMediaDataSource.setCurrent(media);
+
+            mView.setTitle(media.getName());
+            mView.scrollToPosition(media.getPosition());
+            mView.showLoading(false);
+            isLoading = false;
+        }));
     }
 }

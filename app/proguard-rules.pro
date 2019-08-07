@@ -67,3 +67,5 @@
 -keep class org.xdty.** { *; }
 
 -keep class com.facebook.stetho.** {*;}
+
+-dontwarn com.google.android.material.**

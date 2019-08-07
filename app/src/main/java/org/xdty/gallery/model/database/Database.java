@@ -4,7 +4,7 @@ import org.xdty.gallery.model.db.Server;
 
 import java.util.List;
 
-import rx.Observable;
+import io.reactivex.Observable;
 
 public interface Database {
 

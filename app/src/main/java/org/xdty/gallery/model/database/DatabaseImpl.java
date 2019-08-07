@@ -7,18 +7,20 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class DatabaseImpl implements Database {
 
     @Inject
     EntityDataStore<Persistable> mDataStore;
+
+    private CompositeDisposable mSubscriptions = new CompositeDisposable();
 
     public DatabaseImpl() {
         Application.getAppComponent().inject(this);
@@ -30,12 +32,9 @@ public class DatabaseImpl implements Database {
 
     @Override
     public Observable<List<Server>> getServers() {
-        return Observable.create(new Observable.OnSubscribe<List<Server>>() {
-            @Override
-            public void call(Subscriber<? super List<Server>> subscriber) {
-                subscriber.onNext(getServersSync());
-                subscriber.onCompleted();
-            }
+        return Observable.create((ObservableOnSubscribe<List<Server>>) emitter -> {
+            emitter.onNext(getServersSync());
+            emitter.onComplete();
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -46,32 +45,26 @@ public class DatabaseImpl implements Database {
 
     @Override
     public void addServer(Server server) {
-        Observable.just(server).observeOn(Schedulers.io()).subscribe(new Action1<Server>() {
-            @Override
-            public void call(Server server) {
-                mDataStore.insert(server);
-            }
-        });
+        mSubscriptions.add(
+                Observable.just(server).observeOn(Schedulers.io())
+                        .subscribe(s -> mDataStore.insert(s))
+        );
     }
 
     @Override
     public void removeServer(Server server) {
-        Observable.just(server).observeOn(Schedulers.io()).subscribe(new Action1<Server>() {
-            @Override
-            public void call(Server server) {
-                mDataStore.delete(server);
-            }
-        });
+        mSubscriptions.add(
+                Observable.just(server).observeOn(Schedulers.io())
+                        .subscribe(s -> mDataStore.delete(s))
+        );
     }
 
     @Override
     public void updateServer(Server server) {
-        Observable.just(server).observeOn(Schedulers.io()).subscribe(new Action1<Server>() {
-            @Override
-            public void call(Server server) {
-                mDataStore.update(server);
-            }
-        });
+        mSubscriptions.add(
+                Observable.just(server).observeOn(Schedulers.io())
+                        .subscribe(s -> mDataStore.update(s))
+        );
     }
 
     private static class SingletonHelper {
