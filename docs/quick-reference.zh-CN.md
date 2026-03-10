@@ -14,7 +14,7 @@ flowchart TB
     subgraph app核心分层
       UI[Activity / Fragment / Adapter\nMainActivity / ViewerActivity / ImageFragment]
       MVP[Contract + Presenter\nMainContact / ViewerContact\nMainPresenter / ViewerPresenter]
-      DATA[Data\nMediaDataSource(MediaRepository)\nMediaCache]
+      DATA[Data\nMediaDataSource / MediaRepository\nMediaCache]
       MODEL[Model\nMedia 抽象 + Local/Samba/WebDav/AutoIndex]
       DB[Database\nRequery + Server 实体]
       DI[Dagger DI\nAppComponent + AppModule]
@@ -82,7 +82,7 @@ flowchart LR
     I[实现 Media 接口\n例如 XxxMedia]
     S[声明 scheme()\n如 xxx://]
     U[实现 fromUri()/children()/getInputStream()/auth()]
-    R[在 MainPresenter.start() 中 register(new XxxMedia())]
+    R[在 MainPresenter.start 中调用 register 新实现]
     D[可选: 在数据库中保存连接信息]
 
     I --> S --> U --> R --> D
