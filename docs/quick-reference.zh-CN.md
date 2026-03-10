@@ -80,9 +80,9 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     I[实现 Media 接口\n例如 XxxMedia]
-    S[声明 scheme()\n如 xxx://]
-    U[实现 fromUri()/children()/getInputStream()/auth()]
-    R[在 MainPresenter.start 中调用 register 新实现]
+    S[声明协议标识 例如 smb 或 dav]
+    U[实现必要方法 fromUri children getInputStream auth]
+    R[在 MainPresenter start 中注册新实现]
     D[可选: 在数据库中保存连接信息]
 
     I --> S --> U --> R --> D
