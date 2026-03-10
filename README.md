@@ -30,3 +30,7 @@ An extensible android gallery that supports samba/windows share, http/https/webd
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
  ```
+## 文档
+
+- 新人速查图（中文）：[`docs/quick-reference.zh-CN.md`](docs/quick-reference.zh-CN.md)
+
